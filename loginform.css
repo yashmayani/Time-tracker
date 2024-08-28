@@ -1,0 +1,96 @@
+
+.input-group-text img {
+  width: 20px;
+  height: 20px;
+}
+/* loginform.css */
+body {
+
+  background-image:url("./site_img/IMG_0606.png");
+  background-position:cover;
+  background-repeat:no-repeat;
+  background-size:cover;
+}
+
+.card {
+  max-width: 400px;
+  width: 100%;
+  margin: auto;
+  border-radius: 10px;
+  background-color:rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(10px);
+    border:none;
+   box-shadow: 0   0px 20px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+   --bs-card-spacer-x: 3rem;
+   
+  }
+
+.card-title {
+  color: black;
+  font-size: 30px;
+}
+
+.card-text {
+  color: #758694;
+  font-size: 13px;
+}
+
+.buttn {
+  width: 100%;
+  margin-top: 15px !important;
+  margin-bottom: -23px !important;
+  color:white;
+  background-color: black;
+  border:none;
+  border-radius: 5px;
+  height:38px;
+}
+
+.input-group-text img {
+  cursor: pointer;
+
+}
+
+.alert {
+  padding: 10px;
+  background-color: #f2dede;
+  color: #a94442;
+}
+.h1{
+  color:black; 
+  font-size:30px;
+  margin-top:10px;
+  }
+  .p{
+      color:black;
+       font-size:14px;
+       
+   
+  }
+.login-logo{
+    margin-top: 45px;
+    margin-left:127px;
+    
+}
+.form-control{
+  border:1px solid rgb(96, 96, 96);
+  border-right:none;
+}
+.input-group-text{
+  border:1px solid  rgb(96, 96, 96);
+  background-color:white;
+}
+#exampleInputEmail1{
+  border:1px solid rgb(96, 96, 96);
+}
+.form-control:focus{
+  box-shadow: none ;
+}
+.form-control:focus{
+  border:1px solid rgb(96, 96, 96);
+  border-right:none;
+}
+.hey{
+  font-size:26px !important;
+}

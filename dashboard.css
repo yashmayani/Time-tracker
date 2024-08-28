@@ -1,0 +1,457 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+.navbar-item {
+  font-family: "Rubik", sans-serif !important;
+}
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+.fonts {
+  font-family: "Rubik", sans-serif !important;
+  font-size: 50px;
+}
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+.btn.added {
+  font-family: "Rubik", sans-serif !important;
+}
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+
+.as {
+  font-family: "Rubik", sans-serif !important;
+}
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+body {
+  font-family: "Rubik", sans-serif !important;
+}
+/* styles.css */
+
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Sidebar styles */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: white;
+  color: black;
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(146, 141, 141, 0.651) !important;
+}
+
+.logo {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.sidebar-item {
+  margin: 10px 0;
+  font-size: 18px;
+  cursor: pointer;
+
+}
+
+.sidebar-item:hover {
+  background-color:#3365da;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Main content styles */
+.main-content {
+  margin-left: 250px;
+  margin-top: 100px;
+  background-color: #fff;
+  overflow-y: auto;
+}
+
+/* Navbar styles */
+.navbar {
+  background-color: white;
+  color: rgba(30, 30, 30, 1);
+  padding-block: 15px !important;
+  font-size: 45px;
+  text-align: start;
+  margin-left: 250px;
+  --bs-navbar-padding-y:0px !important;
+}
+.navbar-item {
+  background-color: white;
+  margin-left: 26px;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Content area */
+.content {
+  padding: 20px;
+}
+.hi {
+  border: -4px solid rgba(255, 255, 255, 1);
+}
+.name {
+  color: rgba(0, 113, 218, 1); /* Color for the PHP-generated name */
+  font-weight: bold;
+  font-size: 46px;
+}
+
+.main-nav {
+  border-bottom: 1px solid rgba(146, 141, 141, 0.651) !important;
+}
+
+.btn.added {
+  width: 150px;
+  height: 35px;
+  background-color: #161616 !important; /* Background color for the button */
+  color: #fff; /* Text color for the button */
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 5px; /* Rounded corners for the button */
+  text-decoration: none; /* Remove underline from link */
+
+  margin-right: 10px;
+}
+.btn.added:hover {
+  color: rgb(201, 191, 191);
+}
+.btn.it:hover {
+  color: white;
+  background-color: black !important;
+}
+
+.space {
+  display: flex;
+  justify-content: space-between;
+
+}
+.spaces{
+  display: flex;
+  gap: 10px;
+}
+/* Basic reset for margin and padding */
+body,
+table {
+  margin: 0;
+  padding: 0;
+  border-collapse: collapse; /* Ensures table borders are collapsed */
+}
+
+/* Style for the table */
+.table {
+  width: 100%;
+  border-collapse: collapse; /* Collapses the table borders */
+  margin-top: 50px;
+}
+
+.table th {
+  padding: 8px; /* Padding inside header cells for better readability */
+  text-align: left; /* Align text to the left */
+  border-bottom: 1px solid #ddd; /* Light gray border for table rows */
+}
+
+.table td {
+  border: none; /* Remove borders from table cells */
+  padding: 8px; /* Padding inside cells for better readability */
+  text-align: left; /* Align text to the left */
+}
+
+.table tr {
+  border-bottom: 1px solid #ddd; /* Light gray border for table rows */
+}
+
+.table tr:last-child {
+  border-bottom: 1px solid #ddd; /* Remove border from the last row */
+}
+
+.table-striped tbody tr {
+  background-color: #fff; /* White background for all rows */
+}
+
+.main-content {
+  padding: 20px;
+}
+
+.btn.added {
+  background-color: #3365da;
+  color: white;
+
+}
+
+.modal-header {
+  background-color: white;
+  border-bottom: 1px solid #dee2e6;
+  border-bottom: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  color: black;
+}
+
+.btn.it {
+  background-color: black;
+  color: white;
+}
+
+.modal-body {
+  padding: 0 !important;
+}
+
+.form-control,
+.form-select {
+  border-radius: 0.25rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.btn.it {
+  width: 100%;
+  margin-top: 25px;
+}
+
+.btn.its {
+  /* margin-left: 410px; */
+  padding: 0 !important;
+}
+
+.btn.ites {
+  color: #3365da;
+  /* margin-top:32px; */
+}
+
+.modal-dialog-centered {
+  margin: 1.75rem auto;
+}
+.modal-content {
+  width: 83% !important;
+}
+.hi {
+  position: relative;
+
+  display: flex;
+  justify-content: end;
+}
+.modal-form {
+  padding: 30px;
+}
+
+.login-logo {
+  /* margin-left: 30px !important; */
+  margin-top: 18px;
+
+}
+
+.login-photo {
+  margin-left: 45%;
+  margin-top: 10px;
+  transform: translate(-50%, 0);
+  height: 10px;
+  width: 100px;
+}
+
+.item-wrapper {
+  width: 100%;
+}
+.sidebar-item {
+  padding: 10px;
+  text-decoration: none ;
+  border-radius: 10px 0 0px 10px !important;
+  color:rgb(8, 8, 8) !important;
+  
+ 
+}
+
+
+.sidebar-a{
+  color: black !important;
+  text-decoration: none !important;
+}
+
+.sidebar-a:hover, .sidebar-a.active{
+  text-decoration: none !important;
+}
+
+
+.sidebar-item.active{
+  border-radius: 10px 0 0px 10px !important;
+  background-color: #3365da;
+}
+
+.sidebar-item a{
+  padding: 10px;
+  text-decoration: none ;
+  border-radius: 10px 0 0px 10px !important;
+  color:rgb(8, 8, 8) !important;
+}
+
+.sidebar-a:hover .sidebar-item, .sidebar-a.active .sidebar-item{
+  color: white !important;
+}
+
+
+
+.sidebar-item.active a{
+  font-weight: bold; /* Optional: make the text bold */
+  text-decoration: none ;
+}
+.prodev{
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center;
+}
+.yess{
+  color:#3365da !important;
+  background-color: rgb(209, 202, 202);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  padding: 3px;
+  margin-right:13px;
+  font-size: 20px;
+}
+.as{
+ 
+  font-size:20px;
+}
+.ass{
+  font-size: 15px;
+  font-weight: 100;
+}
+.sizes{
+  display: flex;
+  flex-direction: column !important;
+}
+
+.my-row{
+  display: flex;
+  gap: 10px;
+}
+.qw{
+  width: 100% !important;
+}
+.er{
+  width: 48% !important;
+  padding-right: 0% !important;
+}
+.yt{
+  width: 80% !important;
+  padding-right: 0% !important;
+}
+.ty{
+  width: 20% !important;
+  margin-top:30px !important;
+}
+.btn-outline-danger {
+  color: red; /* Text color */
+  border-color: red; /* Border color */
+}
+
+.btn-outline-danger .icon {
+  fill: red; /* Default color for the icon */
+  transition: fill 0.3s; /* Smooth transition for color change */
+}
+
+/* Change icon color on button hover and focus */
+.btn-outline-danger:hover .icon,
+.btn-outline-danger:focus .icon,
+.btn-outline-danger:active .icon {
+  fill: white !important; /* Icon color on hover/focus/active */
+}
+.btn-outline-success {
+  color: green; /* Text color */
+  border-color:green; /* Border color */
+}
+
+/* SVG icon color */
+.btn-outline-success .icon {
+  fill: green; /* Default icon color */
+  transition: fill 0.3s; /* Smooth transition for color change */
+}
+
+/* Change icon color on button hover, focus, and active */
+.btn-outline-success:hover .icon,
+.btn-outline-success:focus .icon,
+.btn-outline-success:active .icon {
+  fill: white; /* Icon color on hover/focus/active */
+}
+
+/* Optional: change text color on hover/focus/active */
+.btn-outline-success:hover,
+.btn-outline-success:focus,
+.btn-outline-success:active {
+  color: white; /* Text color on hover/focus/active */
+}
+.sizing {
+  width: 65% !important;
+  height: 274px !important;
+}
+.heyy {
+  padding: 15px !important;
+  font-size: 16px;
+}
+.modal-bodys {
+  padding: 21px !important;
+}
+.aaaa{
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  font-size: 40px;
+  color:#3365da;
+}
+#main-table{
+  height: 63vh;
+  overflow-y: auto;
+}
+.yass{
+  background-color:#ebecef;
+  padding:15px;
+  width: min-content;
+  display:flex;
+  justify-content:center;
+  border-radius:13px;
+  margin-top: 15px;
+}
+.yash{
+  display:flex;
+  justify-content:center;;
+  gap:5px !important;
+  margin-bottom:10px;
+
+
+}
+
+.delete-modal{
+  text-align:center;
+  
+}
+.delete-modal2{
+  height: 300px !important;
+  width:300px !important;
+  padding:20px;
+  background-color:white;
+  border-radius: 10px !important;
+}
+
+
+p{
+   margin-top:15px !important;
+}
