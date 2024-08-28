@@ -20,6 +20,7 @@ ON
 ")->fetch_all();
 print_r('<pre>');
  var_dump($projects);
+ 
 ?>
 
 
