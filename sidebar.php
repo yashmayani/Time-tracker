@@ -91,6 +91,13 @@ select {
                 Project
             </div>
         </a>
+        <?php if ($_SESSION['role']==1) {?>
+        <a href="1.php" class="sidebar-a <?php if ($current_page == '1.php') echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == '1.php') echo 'active'; ?>">
+                Employee
+            </div>
+        </a>
+        <?php }?>
     </div>
 
     <div class="">

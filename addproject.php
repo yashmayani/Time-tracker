@@ -615,7 +615,9 @@ table {
 p {
     margin-top: 15px !important;
 }
-
+th{
+    color:#686D76!important;
+}
 /* .modal-footer{
     border:none;
 } */

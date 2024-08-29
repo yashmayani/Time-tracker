@@ -455,3 +455,35 @@ table {
 p{
    margin-top:15px !important;
 }
+th{
+  color:#686D76!important;
+  /* font-family:Nunito Sans !important;
+  font-weight: 700; */
+}
+/* td{
+  font-family:Nunito Sans !important;
+  font-weight: 400;
+
+} */
+.btn.addid {
+  width: 150px;
+  height: 35px;
+  background-color: #161616 !important; /* Background color for the button */
+  color: #fff; /* Text color for the button */
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 5px; /* Rounded corners for the button */
+  text-decoration: none; /* Remove underline from link */
+
+  margin-right: 10px;
+}
+.btn.addid:hover {
+  color: rgb(201, 191, 191);
+}
+.qwe{
+  display: flex;
+  justify-content: end;
+}
