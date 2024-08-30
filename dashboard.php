@@ -4,6 +4,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 include("./config.php");
 
+
+
+
+
+
+
 $projects = $conn->query("SELECT * FROM project")->fetch_all(MYSQLI_ASSOC);
 // var_dump($project);
 
@@ -43,6 +49,36 @@ if ($updatedaily_updates) {
 
 }
 include("navbar.php");
+
+
+if(isset($_POST['date_view'])){
+    $date_from_form = $_POST['date'];
+
+// Fetch records for the given date
+$sql =  $conn->prepare("SELECT 
+    du.update_id,
+    du.project_id,
+    du.task,
+    du.date,
+    du.hour,
+    du.minute,
+    du.commit_id,
+    p.project_name
+FROM 
+    daily_updates AS du
+JOIN 
+    project AS p
+ON 
+    du.project_id = p.project_id
+    WHERE 
+        du.employee_id = ? AND date = ?");
+$sql->bind_param("ss", $_SESSION['employee_id'],$date_from_form);
+$sql->execute();
+$result = $sql->get_result();
+$project = $result->fetch_all(MYSQLI_ASSOC);
+}
+
+
 include("sidebar.php");
 // Your database queries and processing code here
 
@@ -110,6 +146,7 @@ foreach ($totalsByDate as $date => &$total) {
 </head>
 
 <body>
+
     <div class="main-content">
         <div class="content">
             <!-- Your main content goes here -->
@@ -120,10 +157,15 @@ foreach ($totalsByDate as $date => &$total) {
                     Update</a>
             </div>
             <div class="qwe">
-                <a href="#" class="btn addid btn-sm" data-bs-toggle="modal" data-bs-target="#calendarmodal">All
-                    Update</a>
+
+                <form action="dashboard.php" method="post">
+                    <input type="date" id="date" name="date" required>
+                    <input type="submit" name='date_view' value="Submit">
+                </form>
+                <!-- <input type="date" name="date" data-date="" class="addid" required> -->
+
             </div>
-            
+
 
         </div>
         <div id="main-table">
@@ -590,6 +632,23 @@ foreach ($totalsByDate as $date => &$total) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
         integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous">
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+    $(".addid").on("change", function() {
+        this.setAttribute(
+            "data-date",
+            this.value
+        )
+        console.log(this.value)
+    }).trigger("change")
+    </script>
+
+
     <script>
     let taskCount = 1;
 

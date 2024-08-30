@@ -1,6 +1,3 @@
-
-
-
 <?php
     $current_page = basename($_SERVER['PHP_SELF']);
 
@@ -70,6 +67,7 @@ $project = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // Process the results as needed
+
 
 
 // echo '<pre>';
@@ -151,18 +149,18 @@ if (isset($_SESSION['name'])) {
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-lg-0 d-flex justify-content-between align-items-center w-100">
                 <li class="nav-item">
-                   
+
                 </li>
                 <li class="nav-item">
                     <div class="navbar-item">
                         <p class="prodev">
-                            <div class="yess">
-                                <b> <?php echo htmlspecialchars($firstInitial . $lastInitial); ?></b>
-                            </div>
-                            <div class="sizes">
-                                <span class="as"><b> <?php echo htmlspecialchars($_SESSION['name']); ?></b></span>
-                                <span class="ass"><b> <?php echo htmlspecialchars($_SESSION['position']); ?></b></span>
-                            </div>
+                        <div class="yess">
+                            <b> <?php echo htmlspecialchars($firstInitial . $lastInitial); ?></b>
+                        </div>
+                        <div class="sizes">
+                            <span class="as"><b> <?php echo htmlspecialchars($_SESSION['name']); ?></b></span>
+                            <span class="ass"><b> <?php echo htmlspecialchars($_SESSION['position']); ?></b></span>
+                        </div>
                         </p>
                     </div>
                 </li>
