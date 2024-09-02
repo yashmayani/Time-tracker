@@ -86,18 +86,18 @@ select {
                 Update
             </div>
         </a>
-        <a href="addproject.php" class="sidebar-a <?php if ($current_page == 'addproject.php') echo 'active'; ?>">
-            <div class="sidebar-item <?php if ($current_page == 'addproject.php') echo 'active'; ?>">
+        <a href="addproject.php" class="sidebar-a <?php if ($current_page == 'addproject.php'||$current_page == 'view_project.php' ) echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == 'addproject.php' ||$current_page == 'view_project.php') echo 'active'; ?>">
                 Project
             </div>
         </a>
         <?php if ($_SESSION['role']==1) {?>
-        <a href="employee.php" class="sidebar-a <?php if ($current_page == 'employee.php') echo 'active'; ?>">
-            <div class="sidebar-item <?php if ($current_page == 'employee.php') echo 'active'; ?>">
+        <a href="employee.php" class="sidebar-a <?php if ($current_page == 'employee.php'||$current_page == 'view_emp.php') echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == 'employee.php'||$current_page == 'view_emp.php') echo 'active'; ?>">
                 Employee
             </div>
         </a>
-        <?php }?>
+        <?php }?> 
     </div>
 
     <div class="">

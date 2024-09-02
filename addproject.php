@@ -12,9 +12,10 @@ $projects = $conn->query("SELECT * FROM project")->fetch_all(MYSQLI_ASSOC);
 
 if(isset($_POST['editproject'])){
     $project_name = $_POST['project'];
+    $client = $_POST['client'];
     $id = $_POST['project_id'];
 
-    $updateproject = $conn->query("UPDATE project SET project_name = '$project_name' WHERE project_id = '$id'");
+    $updateproject = $conn->query("UPDATE project SET project_name = '$project_name', client_name = '$client' WHERE project_id = '$id'");
 // var_dump($updateprojects);
 if ($updateproject) {
     header("Location: addproject.php");
@@ -387,7 +388,7 @@ table {
 
 .modal-content {
     width: 65% !important;
-    height: 287px;
+    height: 100%;
 }
 
 .sizing {
@@ -565,6 +566,36 @@ table {
     color: white;
     /* Text color on hover/focus/active */
 }
+.btn-outline-primary {
+    color: blue;
+    /* Text color */
+    border-color: blue;
+    /* Border color */
+}
+
+/* SVG icon color */
+.btn-outline-primary .icon {
+    fill: blue;
+    /* Default icon color */
+    transition: fill 0.3s;
+    /* Smooth transition for color change */
+}
+
+/* Change icon color on button hover, focus, and active */
+.btn-outline-primary:hover .icon,
+.btn-outline-primary:focus .icon,
+.btn-outline-primary:active .icon {
+    fill: white;
+    /* Icon color on hover/focus/active */
+}
+
+/* Optional: change text color on hover/focus/active */
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    color: white;
+    /* Text color on hover/focus/active */
+}
 
 .aaaa {
     display: flex;
@@ -647,6 +678,7 @@ th{
                         <tr>
                             <th>PROJECT ID</th>
                             <th>PROJECT NAME</th>
+                            <th>CLIENT NAME</th>
                             <?php if ($_SESSION['role']==1) {?>
                             <th>ACTION</th>
                             <?php }?>
@@ -657,10 +689,25 @@ th{
                         <tr>
                             <td><?php echo htmlspecialchars($p['project_id']); ?></td>
                             <td><?php echo htmlspecialchars($p['project_name']); ?></td>
+                            <td><?php echo htmlspecialchars($p['client_name']); ?></td>
 
 
                             <?php if ($_SESSION['role']==1) {?>
+                                
                             <td class="spaces">
+                                
+                      
+                            <a class="btn btn-outline-primary" 
+                            href="view_project.php?id=<?php echo htmlspecialchars($p['project_id']); ?>">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                    width="24px" class="icon">
+                                    <path
+                                        d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+                                </svg>
+                                <b>View</b>
+                            </a>    
+                        
+
                                 <a href="#" onclick="func(e)" class="btn btn-outline-success " data-bs-toggle="modal"
                                     data-bs-target="#editMeetingModal<?php echo $p['project_id']; ?>"><svg
                                         xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
@@ -708,6 +755,12 @@ th{
                                                                     Project</label>
                                                                 <input type="text" name="project" class="form-control"
                                                                     value="<?php echo $p['project_name']; ?>" required>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="project" class="form-label">client
+                                                                    name</label>
+                                                                <input type="text" name="client" class="form-control"
+                                                                    value="<?php echo $p['client_name']; ?>" required>
                                                             </div>
                                                         </div>
 
@@ -814,6 +867,11 @@ th{
                                         <label for="project" class="form-label">Add Project</label>
                                         <input type="text" name="project" class="form-control"
                                             placeholder="Enter new project" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="project" class="form-label">client name</label>
+                                        <input type="text" name="client" class="form-control"
+                                            placeholder="Enter your client name" required>
                                     </div>
                                 </div>
 

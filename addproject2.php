@@ -6,9 +6,10 @@ include("./config.php");
 
 if(isset($_POST['addproject'])){
     $project=$_POST['project'];
+    $client=$_POST['client'];
 
 
-    $addproject=$conn->query("insert into project(project_name)values('$project')");
+    $addproject=$conn->query("insert into project(project_name,client_name)values('$project','$client')");
     
     
     // print_r($project);

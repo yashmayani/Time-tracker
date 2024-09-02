@@ -4,7 +4,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 include("./config.php");
 
-
+$emp_id=$_GET['id'];
+$name=$_GET['name'];
 
 
 
@@ -48,13 +49,8 @@ if ($updatedaily_updates) {
 
 
 }
-include("navbar.php");
+include("navbarss.php");
 
-
-if(isset($_POST['date_view'])){
-    $date_from_form = $_POST['date'];
-
-// Fetch records for the given date
 $sql =  $conn->prepare("SELECT 
     du.update_id,
     du.project_id,
@@ -71,12 +67,11 @@ JOIN
 ON 
     du.project_id = p.project_id
     WHERE 
-        du.employee_id = ? AND date = ?");
-$sql->bind_param("ss", $_SESSION['employee_id'],$date_from_form);
+        du.employee_id = ? ");
+$sql->bind_param("s", $emp_id);
 $sql->execute();
 $result = $sql->get_result();
 $project = $result->fetch_all(MYSQLI_ASSOC);
-}
 
 
 include("sidebar.php");
@@ -152,23 +147,15 @@ foreach ($totalsByDate as $date => &$total) {
             <!-- Your main content goes here -->
 
             <div class="space">
-                <b class="aaaa">Daily Update</b>
-                <a href="#" class="btn added btn-sm" data-bs-toggle="modal" data-bs-target="#createMeetingModal">Add
-                    Update</a>
-            </div>
-            <div class="qwe">
-
-                <form action="dashboard.php" method="post">
-                    <input type="date" id="date" name="date" required>
-                    <input type="submit" name='date_view' value="Filter">
-                </form>
-                <!-- <input type="date" name="date" data-date="" class="addid" required> -->
-
-            </div>
+             
+            <b class="aaaa"><?php echo $name; ?></b>
+           
 
 
         </div>
         <div id="main-table">
+           
+          
             <table id="vehicleTable" class="table table-striped">
                 <thead>
                     <tr>
@@ -177,7 +164,8 @@ foreach ($totalsByDate as $date => &$total) {
                         <th>TIME</th>
                         <th>COMMIT ID</th>
                         <th>PROJECT</th>
-                        <th>ACTION</th>
+                       
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -209,68 +197,7 @@ foreach ($totalsByDate as $date => &$total) {
 
 
 
-                        <td>
-                            <span class="spaces">
-                                <a href="#" onclick="func(e)" class="btn btn-outline-success " data-bs-toggle="modal"
-                                    data-bs-target="#editMeetingModal<?php echo $p['update_id']; ?>"><svg
-                                        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                        width="24px" class="icon">
-                                        <path
-                                            d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
-                                    </svg><b>Edit</b></a>
-                                <button type="button" class="btn btn-outline-danger delete-btn"
-                                    data-id="<?php echo $p['update_id']; ?>" data-bs-toggle="modal"
-                                    data-bs-target="#deleteConfirmationModal<?php echo $p['update_id']; ?>">
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                        width="24px" class="icon">
-                                        <path
-                                            d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-                                    </svg>
-                                    Delete
-                                </button>
-
-
-                                <div class="modal fade" id="deleteConfirmationModal<?php echo $p['update_id']; ?>"
-                                    tabindex="-1" aria-labelledby="editMeetingModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content delete-modal2">
-                                            <div class="modal ">
-
-
-                                            </div>
-                                            <div class="modal-body delete-modal">
-
-                                                <center>
-                                                    <div class="yass">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" height="30px"
-                                                            viewBox="0 -960 960 960" width="30px" fill="red"
-                                                            style="background-color:#ebecef; border-radius: 10px !important;  width: 30px; height: 30px;">
-                                                            <path
-                                                                d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-                                                        </svg>
-                                                    </div>
-                                                    <center>
-                                                        <p style=color:red;><b>Delete</b></p>
-                                                        <p>Are you want to sure delete update?</p>
-
-
-                                            </div>
-                                            <div class="yash">
-                                                <form method="POST" action="deleteupdate.php"
-                                                    style="display: flex; gap: 15px;">
-
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Cancel</button>
-                                                    <input type="hidden" name="delete_project_id"
-                                                        value="<?php echo $p['update_id']; ?>">
-                                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
+                       
 
 
                                 <div class="modal fade" id="editMeetingModal<?php echo $p['update_id']; ?>"

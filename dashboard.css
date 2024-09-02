@@ -399,6 +399,7 @@ table {
 .btn-outline-success:active {
   color: white; /* Text color on hover/focus/active */
 }
+
 .sizing {
   width: 65% !important;
   height: 274px !important;

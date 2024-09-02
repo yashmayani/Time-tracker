@@ -3,7 +3,7 @@
 $host="localhost";
 $username="root";
 $password=null;
-$database="prodev_infotech";
+$database="time_tracker";
 
 
 $conn=new mysqli ($host,$username,$password,$database);
