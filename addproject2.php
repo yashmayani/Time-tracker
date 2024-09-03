@@ -7,9 +7,12 @@ include("./config.php");
 if(isset($_POST['addproject'])){
     $project=$_POST['project'];
     $client=$_POST['client'];
+    $project_start_date=$_POST['project_start_date'];
+    $project_end_date=$_POST['project_end_date'];
+    $platform=$_POST['platform'];
+//  print_r($_POST);
 
-
-    $addproject=$conn->query("insert into project(project_name,client_name)values('$project','$client')");
+    $addproject=$conn->query("insert into project(project_name,client_name,start_date,end_date,platform)values('$project','$client','$project_start_date','$project_end_date','$platform')");
     
     
     // print_r($project);

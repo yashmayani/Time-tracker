@@ -7,15 +7,28 @@ include("./config.php");
 
 
 $projects = $conn->query("SELECT * FROM project")->fetch_all(MYSQLI_ASSOC);
-// print_r('<pre>');
+//  print_r('<pre>');
 // var_dump($projects);
+$eid=$_SESSION['employee_id'];
+
+$select_project_id = $conn->query("SELECT project_id from project_assign where employee_id = $eid ")->fetch_all(MYSQLI_ASSOC);
+// print_r('<pre>');
+// var_dump($select_project_id);
+
+$allIds = [];
+foreach ($select_project_id as $project) {
+    $allIds[] = $project['project_id'];
+}
 
 if(isset($_POST['editproject'])){
     $project_name = $_POST['project'];
     $client = $_POST['client'];
+    $project_start_date = $_POST['project_start_date'];
+    $project_end_date = $_POST['project_end_date'];
+    $platform = $_POST['platform'];
     $id = $_POST['project_id'];
 
-    $updateproject = $conn->query("UPDATE project SET project_name = '$project_name', client_name = '$client' WHERE project_id = '$id'");
+    $updateproject = $conn->query("UPDATE project SET project_name = '$project_name', client_name = '$client', start_date = '$project_start_date', end_date = '$project_end_date', platform = '$platform' WHERE project_id = '$id'");
 // var_dump($updateprojects);
 if ($updateproject) {
     header("Location: addproject.php");
@@ -45,7 +58,19 @@ if (isset($_POST['delete'])) {
         // Deletion failed, handle error
         echo "Error deleting vehicle.";
     }
- }$projects = $conn->query("SELECT * FROM project")->fetch_all(MYSQLI_ASSOC);
+ }
+ 
+ if(count($allIds)>0){
+    $idsString = implode(',', $allIds);
+    $formattedIds = "($idsString)";
+    $projects = $conn->query("SELECT * FROM project where project_id in $formattedIds")->fetch_all(MYSQLI_ASSOC);
+}
+else{
+    $projects=[];
+}
+if (($_SESSION['role']==1)) {
+    $projects = $conn->query("SELECT * FROM project")->fetch_all(MYSQLI_ASSOC);
+}
 
  if (isset($_POST['submit'])) {
      $project = trim($_POST['project']);
@@ -162,8 +187,8 @@ body {
     top: 0;
     padding-left: 18px;
     display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+    flex-direction: column;
+    justify-content: space-between;
     border-right: 1px solid rgba(146, 141, 141, 0.651) !important;
 }
 
@@ -387,7 +412,7 @@ table {
 }
 
 .modal-content {
-    width: 65% !important;
+    width: 100% !important;
     height: 100%;
 }
 
@@ -566,6 +591,7 @@ table {
     color: white;
     /* Text color on hover/focus/active */
 }
+
 .btn-outline-primary {
     color: blue;
     /* Text color */
@@ -646,9 +672,11 @@ table {
 p {
     margin-top: 15px !important;
 }
-th{
-    color:#686D76!important;
+
+th {
+    color: #686D76 !important;
 }
+
 /* .modal-footer{
     border:none;
 } */
@@ -693,20 +721,20 @@ th{
 
 
                             <?php if ($_SESSION['role']==1) {?>
-                                
+
                             <td class="spaces">
-                                
-                      
-                            <a class="btn btn-outline-primary" 
-                            href="view_project.php?id=<?php echo htmlspecialchars($p['project_id']); ?>">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                    width="24px" class="icon">
-                                    <path
-                                        d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
-                                </svg>
-                                <b>View</b>
-                            </a>    
-                        
+
+
+                                <a class="btn btn-outline-primary"
+                                    href="view_project.php?id=<?php echo htmlspecialchars($p['project_id']); ?>">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                        width="24px" class="icon">
+                                        <path
+                                            d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+                                    </svg>
+                                    <b>View</b>
+                                </a>
+
 
                                 <a href="#" onclick="func(e)" class="btn btn-outline-success " data-bs-toggle="modal"
                                     data-bs-target="#editMeetingModal<?php echo $p['project_id']; ?>"><svg
@@ -757,10 +785,35 @@ th{
                                                                     value="<?php echo $p['project_name']; ?>" required>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="project" class="form-label">client
-                                                                    name</label>
+                                                                <label for="project" class="form-label">Client
+                                                                    Name</label>
                                                                 <input type="text" name="client" class="form-control"
                                                                     value="<?php echo $p['client_name']; ?>" required>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="mb-3 col">
+                                                                    <label for="project" class="form-label">Project
+                                                                        Start
+                                                                        Date
+                                                                    </label>
+                                                                    <input type="date" name="project_start_date"
+                                                                        class="form-control"
+                                                                        value="<?php echo $p['start_date']; ?>">
+                                                                </div>
+                                                                <div class="mb-3 col">
+                                                                    <label for="project" class="form-label">Project End
+                                                                        Date
+                                                                    </label>
+                                                                    <input type="date" name="project_end_date"
+                                                                        class="form-control"
+                                                                        value="<?php echo $p['end_date']; ?>">
+                                                                </div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="project" class="form-label">Platform
+                                                                </label>
+                                                                <input type="text" name="platform" class="form-control"
+                                                                    value="<?php echo $p['platform']; ?>" required>
                                                             </div>
                                                         </div>
 
@@ -869,10 +922,28 @@ th{
                                             placeholder="Enter new project" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="project" class="form-label">client name</label>
+                                        <label for="project" class="form-label">Client Name</label>
                                         <input type="text" name="client" class="form-control"
                                             placeholder="Enter your client name" required>
                                     </div>
+                                    <div class="row">
+                                        <div class="mb-3 col">
+                                            <label for="project" class="form-label">Project Start Date</label>
+                                            <input type="date" name="project_start_date" class="form-control">
+
+                                        </div>
+                                        <div class="mb-3 col">
+                                            <label for="project" class="form-label">Project End Date</label>
+                                            <input type="date" name="project_end_date" class="form-control">
+
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="project" class="form-label">plateform</label>
+                                        <input type="text" name="platform" class="form-control"
+                                            placeholder="Enter your platform" required>
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -891,4 +962,4 @@ th{
                         crossorigin="anonymous"></script>
 </body>
 
-</html> 
+</html>
