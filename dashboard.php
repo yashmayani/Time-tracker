@@ -102,7 +102,7 @@ if (isset($_POST['delete'])) {
     }                                                           
  }
  
-?>
+?>                
 <?php
 // Assuming $project is an array of records
 $groupedByDate = [];
@@ -158,9 +158,12 @@ foreach ($totalsByDate as $date => &$total) {
             </div>
             <div class="qwe">
 
+
                 <form action="dashboard.php" method="post">
-                    <input type="date" id="date" name="date" required>
-                    <input type="submit" name='date_view' value="Filter">
+                    <input type="date" id="date"
+                        value="<?php echo isset($_POST['date']) ? htmlspecialchars($_POST['date']) : ''; ?>" name="date"
+                        required>
+                    <input type="submit" name='date_view' value="filter">
                 </form>
                 <!-- <input type="date" name="date" data-date="" class="addid" required> -->
 

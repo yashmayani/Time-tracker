@@ -86,8 +86,8 @@ select {
                 Update
             </div>
         </a>
-        <a href="addproject.php" class="sidebar-a <?php if ($current_page == 'addproject.php'||$current_page == 'view_project.php' ) echo 'active'; ?>">
-            <div class="sidebar-item <?php if ($current_page == 'addproject.php' ||$current_page == 'view_project.php') echo 'active'; ?>">
+        <a href="addproject.php" class="sidebar-a <?php if ($current_page == 'addproject.php'||$current_page == 'view_project.php' ||$current_page == 'view_complete_project.php' ) echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == 'addproject.php' ||$current_page == 'view_project.php'  ||$current_page == 'view_complete_project.php') echo 'active'; ?>">
                 Project
             </div>
         </a>

@@ -416,7 +416,7 @@ table {
   display: flex;
   justify-content: start;
   align-items: center;
-  font-size: 50px;
+  font-size: 40px;
   color:#3365da;
 }
 .ai{
@@ -477,6 +477,7 @@ table {
 
 
 }
+
 
 .delete-modal{
   text-align:center;

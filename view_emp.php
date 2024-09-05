@@ -4,8 +4,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 include("./config.php");
 
-$emp_id=$_GET['id'];
-$name=$_GET['name'];
 
 
 
@@ -51,6 +49,57 @@ if ($updatedaily_updates) {
 }
 include("navbarss.php");
 
+
+
+if (isset($_POST['date_view'])) {
+    $emp_id=$_POST['emp_id'];
+    $startDate = isset($_POST['start_date']) ? $_POST['start_date'] : '';
+    $endDate = isset($_POST['end_date']) ? $_POST['end_date'] : '';
+
+    if ($startDate && $endDate && $startDate <= $endDate) {
+        $sql = $conn->prepare("
+        SELECT 
+            du.update_id,
+            du.project_id,
+            du.task,
+            du.date,
+            du.hour,
+            du.minute,
+            du.commit_id,
+            du.employee_id,
+            p.project_name
+        FROM 
+            daily_updates AS du
+        JOIN 
+            project AS p
+        ON 
+            du.project_id = p.project_id
+        WHERE 
+            du.employee_id = ? 
+            AND du.date BETWEEN ? AND ?
+    ");
+    
+    // Bind the parameters
+    $sql->bind_param("sss", $emp_id, $startDate, $endDate);
+    
+    // Execute the query
+    $sql->execute();
+    
+    // Get the result
+    $result = $sql->get_result();
+    
+    // Fetch all results as an associative array
+    $project = $result->fetch_all(MYSQLI_ASSOC);
+    
+    // Dump the results
+    }
+}
+
+else{
+
+$emp_id=$_GET['id'];
+$name=$_GET['name'];
+
 $sql =  $conn->prepare("SELECT 
     du.update_id,
     du.project_id,
@@ -59,6 +108,7 @@ $sql =  $conn->prepare("SELECT
     du.hour,
     du.minute,
     du.commit_id,
+    du.employee_id,
     p.project_name
 FROM 
     daily_updates AS du
@@ -72,6 +122,7 @@ $sql->bind_param("s", $emp_id);
 $sql->execute();
 $result = $sql->get_result();
 $project = $result->fetch_all(MYSQLI_ASSOC);
+}
 
 
 include("sidebar.php");
@@ -147,263 +198,278 @@ foreach ($totalsByDate as $date => &$total) {
             <!-- Your main content goes here -->
 
             <div class="space">
-             
-            <b class="aaaa"><?php echo $name; ?></b>
-           
+
+                <b class="aaaa"><?php if(isset($_GET['name'])){echo $_GET['name'];}else{echo $_POST['name'];}?></b>
+
+                <form action="view_emp.php" method="post">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date"
+                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>"
+                        required>
+
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date"
+                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>"
+                        required>
+                    <input type="hidden" name='emp_id'
+                        value='<?php if(isset($_GET['id'])){echo $_GET['id'];}else{echo $_POST['emp_id'];}?>'/>
+
+                        <input type="hidden" name='name'
+                        value='<?php if(isset($_GET['name'])){echo $_GET['name'];}else{echo $_POST['name'];}?>'/>
+
+                        <input type="submit" name='date_view' value="Filter">
+                </form>
 
 
-        </div>
-        <div id="main-table">
-           
-          
-            <table id="vehicleTable" class="table table-striped">
-                <thead>
-                    <tr>
-
-                        <th>UPDATE</th>
-                        <th>TIME</th>
-                        <th>COMMIT ID</th>
-                        <th>PROJECT</th>
-                       
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($groupedByDate as $date => $records) { ?>
-                    <!-- Date Header Row -->
-                    <tr class="date-header">
-                    <tr>
-                        <td colspan="6" style="color: #00215E;">
-                            <strong>Date: </strong><?php echo $date; ?>&nbsp; &nbsp; <strong>Total hours:</strong>
-                            <?php echo sprintf('%02d:%02d', $totalsByDate[$date]['hours'], $totalsByDate[$date]['minutes']); ?>
-                        </td>
-                    </tr>
+            </div>
+            <div id="main-table">
 
 
+                <table id="vehicleTable" class="table table-striped">
+                    <thead>
+                        <tr>
+
+                            <th>UPDATE</th>
+                            <th>TIME</th>
+                            <th>COMMIT ID</th>
+                            <th>PROJECT</th>
 
 
-                    </tr>
-                    <!-- Data Rows for the Current Date -->
-                    <?php foreach ($records as $p) { ?>
-                    <tr>
-
-                        <td><?php echo nl2br(($p['task'])); ?></td>
-                        <td><?php echo htmlspecialchars($p['hour']) . ':' . htmlspecialchars($p['minute']); ?></td>
-                        <td><?php echo htmlspecialchars($p['commit_id']); ?></td>
-                        <td><?php echo htmlspecialchars($p['project_name']); ?></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($groupedByDate as $date => $records) { ?>
+                        <!-- Date Header Row -->
+                        <tr class="date-header">
+                        <tr>
+                            <td colspan="6" style="color: #00215E;">
+                                <strong>Date: </strong><?php echo $date; ?>&nbsp; &nbsp; <strong>Total hours:</strong>
+                                <?php echo sprintf('%02d:%02d', $totalsByDate[$date]['hours'], $totalsByDate[$date]['minutes']); ?>
+                            </td>
+                        </tr>
 
 
 
 
+                        </tr>
+                        <!-- Data Rows for the Current Date -->
+                        <?php foreach ($records as $p) { ?>
+                        <tr>
+
+                            <td><?php echo nl2br(($p['task'])); ?></td>
+                            <td><?php echo htmlspecialchars($p['hour']) . ':' . htmlspecialchars($p['minute']); ?></td>
+                            <td><?php echo htmlspecialchars($p['commit_id']); ?></td>
+                            <td><?php echo htmlspecialchars($p['project_name']); ?></td>
 
 
-                       
 
 
-                                <div class="modal fade" id="editMeetingModal<?php echo $p['update_id']; ?>"
-                                    tabindex="-1" aria-labelledby="createMeetingModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <span></span>
-                                                <h3 class="modal-title" id="createMeetingModalLabel"><b>Edit Daily
-                                                        Update</b>
-                                                </h3>
-                                                <svg data-bs-dismiss="modal" aria-label="Close"
-                                                    xmlns="http://www.w3.org/2000/svg" height="30px"
-                                                    viewBox="0 -960 960 960" width="30px" fill="#565656"
-                                                    style="cursor:pointer;">
-                                                    <path
-                                                        d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-                                                </svg>
 
-                                            </div>
-                                            <form class="modal-form" method="POST" action="dashboard.php">
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="md-6">
-                                                            <div class="mb-3">
-                                                                <label for="date" class="form-label">Select Date</label>
-                                                                <input type="date" name="date" class="form-control"
-                                                                    value="<?php echo $p['date']; ?>" required>
-                                                            </div>
+
+
+
+
+                            <div class="modal fade" id="editMeetingModal<?php echo $p['update_id']; ?>" tabindex="-1"
+                                aria-labelledby="createMeetingModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <span></span>
+                                            <h3 class="modal-title" id="createMeetingModalLabel"><b>Edit Daily
+                                                    Update</b>
+                                            </h3>
+                                            <svg data-bs-dismiss="modal" aria-label="Close"
+                                                xmlns="http://www.w3.org/2000/svg" height="30px"
+                                                viewBox="0 -960 960 960" width="30px" fill="#565656"
+                                                style="cursor:pointer;">
+                                                <path
+                                                    d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                                            </svg>
+
+                                        </div>
+                                        <form class="modal-form" method="POST" action="dashboard.php">
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="md-6">
+                                                        <div class="mb-3">
+                                                            <label for="date" class="form-label">Select Date</label>
+                                                            <input type="date" name="date" class="form-control"
+                                                                value="<?php echo $p['date']; ?>" required>
                                                         </div>
+                                                    </div>
+                                                    <div class="md-6">
+                                                        <div class="mb-3">
+                                                            <label for="project" class="form-label">Select
+                                                                Project</label>
+                                                            <select name="projects" id="projects" class="form-select"
+                                                                required>
+                                                                <option value="<?php echo $p['project_id']; ?>" disabled
+                                                                    selected>Select project</option>
+                                                                <?php foreach ($projects as $s): ?>
+                                                                <option
+                                                                    <?php if($s['project_id']==$p['project_id']){echo 'selected';} ?>
+                                                                    value="<?= $s['project_id'] ?>">
+                                                                    <?= $s['project_name'] ?></option>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <div id="input-container">
+                                                    <!-- Initial task-time pair -->
+                                                    <div class="row task-time-container">
                                                         <div class="md-6">
                                                             <div class="mb-3">
-                                                                <label for="project" class="form-label">Select
-                                                                    Project</label>
-                                                                <select name="projects" id="projects"
-                                                                    class="form-select" required>
-                                                                    <option value="<?php echo $p['project_id']; ?>"
-                                                                        disabled selected>Select project</option>
-                                                                    <?php foreach ($projects as $s): ?>
-                                                                    <option
-                                                                        <?php if($s['project_id']==$p['project_id']){echo 'selected';} ?>
-                                                                        value="<?= $s['project_id'] ?>">
-                                                                        <?= $s['project_name'] ?></option>
-                                                                    <?php endforeach; ?>
+                                                                <label for="task" class="form-label">Enter task
+                                                                    description</label>
+                                                                <textarea name="task" class="form-control" id="task-1"
+                                                                    required><?php echo htmlspecialchars($p['task']); ?></textarea>
+                                                            </div>
+
+                                                        </div>
+
+                                                        <div class="my-row">
+                                                            <div class="mb-3">
+                                                                <label for="hours" class="form-label">Select
+                                                                    hours</label>
+                                                                <select name="hours" class="form-select" id="time-1"
+                                                                    required>
+                                                                    <option value="" disabled selected>Select Time
+                                                                        duration
+                                                                    </option>
+                                                                    <option value="0"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 0) ? 'selected' : ''; ?>>
+                                                                        0</option>
+                                                                    <option value="1"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 1) ? 'selected' : ''; ?>>
+                                                                        1</option>
+                                                                    <option value="2"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 2) ? 'selected' : ''; ?>>
+                                                                        2</option>
+                                                                    <option value="3"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 3) ? 'selected' : ''; ?>>
+                                                                        3</option>
+                                                                    <option value="4"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 4) ? 'selected' : ''; ?>>
+                                                                        4</option>
+                                                                    <option value="5"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 5) ? 'selected' : ''; ?>>
+                                                                        5</option>
+                                                                    <option value="6"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 6) ? 'selected' : ''; ?>>
+                                                                        6</option>
+                                                                    <option value="7"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 7) ? 'selected' : ''; ?>>
+                                                                        7</option>
+                                                                    <option value="8"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 8) ? 'selected' : ''; ?>>
+                                                                        8</option>
+                                                                    <option value="9"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 9) ? 'selected' : ''; ?>>
+                                                                        9</option>
+                                                                    <option value="10"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 10) ? 'selected' : ''; ?>>
+                                                                        10</option>
+                                                                    <option value="11"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 11) ? 'selected' : ''; ?>>
+                                                                        11</option>
+                                                                    <option value="12"
+                                                                        <?php echo (isset($p['hour']) && $p['hour'] == 12) ? 'selected' : ''; ?>>
+                                                                        12</option>
                                                                 </select>
                                                             </div>
+
+                                                            <div class="mb-3">
+                                                                <label for="minutes" class="form-label">Select
+                                                                    minutes</label>
+                                                                <select name="minutes" class="form-select" id="time-1"
+                                                                    required>
+                                                                    <option value="" disabled selected>Select Time
+                                                                        duration
+                                                                    </option>
+                                                                    <option value="00"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '00') ? 'selected' : ''; ?>>
+                                                                        00</option>
+                                                                    <option value="05"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '05') ? 'selected' : ''; ?>>
+                                                                        05</option>
+                                                                    <option value="10"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '10') ? 'selected' : ''; ?>>
+                                                                        10</option>
+                                                                    <option value="15"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '15') ? 'selected' : ''; ?>>
+                                                                        15</option>
+                                                                    <option value="20"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '20') ? 'selected' : ''; ?>>
+                                                                        20</option>
+                                                                    <option value="25"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '25') ? 'selected' : ''; ?>>
+                                                                        25</option>
+                                                                    <option value="30"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '30') ? 'selected' : ''; ?>>
+                                                                        30</option>
+                                                                    <option value="35"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '35') ? 'selected' : ''; ?>>
+                                                                        35</option>
+                                                                    <option value="40"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '40') ? 'selected' : ''; ?>>
+                                                                        40</option>
+                                                                    <option value="45"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '45') ? 'selected' : ''; ?>>
+                                                                        45</option>
+                                                                    <option value="50"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '50') ? 'selected' : ''; ?>>
+                                                                        50</option>
+                                                                    <option value="55"
+                                                                        <?php echo (isset($p['minute']) && $p['minute'] == '55') ? 'selected' : ''; ?>>
+                                                                        55</option>
+                                                                </select>
+                                                            </div>
+
+
                                                         </div>
+
+                                                        <div class="md-6">
+                                                            <div class="mb-3">
+                                                                <label for="task" class="form-label">Enter task
+                                                                    commit
+                                                                    id</label>
+                                                                <input type="text" name="commit_id" class="form-control"
+                                                                    value="<?php echo $p['commit_id']; ?>" id="task-1">
+                                                            </div>
+                                                        </div>
+
 
                                                     </div>
-
-                                                    <div id="input-container">
-                                                        <!-- Initial task-time pair -->
-                                                        <div class="row task-time-container">
-                                                            <div class="md-6">
-                                                                <div class="mb-3">
-                                                                    <label for="task" class="form-label">Enter task
-                                                                        description</label>
-                                                                    <textarea name="task" class="form-control"
-                                                                        id="task-1"
-                                                                        required><?php echo htmlspecialchars($p['task']); ?></textarea>
-                                                                </div>
-
-                                                            </div>
-
-                                                            <div class="my-row">
-                                                                <div class="mb-3">
-                                                                    <label for="hours" class="form-label">Select
-                                                                        hours</label>
-                                                                    <select name="hours" class="form-select" id="time-1"
-                                                                        required>
-                                                                        <option value="" disabled selected>Select Time
-                                                                            duration
-                                                                        </option>
-                                                                        <option value="0"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 0) ? 'selected' : ''; ?>>
-                                                                            0</option>
-                                                                        <option value="1"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 1) ? 'selected' : ''; ?>>
-                                                                            1</option>
-                                                                        <option value="2"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 2) ? 'selected' : ''; ?>>
-                                                                            2</option>
-                                                                        <option value="3"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 3) ? 'selected' : ''; ?>>
-                                                                            3</option>
-                                                                        <option value="4"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 4) ? 'selected' : ''; ?>>
-                                                                            4</option>
-                                                                        <option value="5"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 5) ? 'selected' : ''; ?>>
-                                                                            5</option>
-                                                                        <option value="6"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 6) ? 'selected' : ''; ?>>
-                                                                            6</option>
-                                                                        <option value="7"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 7) ? 'selected' : ''; ?>>
-                                                                            7</option>
-                                                                        <option value="8"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 8) ? 'selected' : ''; ?>>
-                                                                            8</option>
-                                                                        <option value="9"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 9) ? 'selected' : ''; ?>>
-                                                                            9</option>
-                                                                        <option value="10"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 10) ? 'selected' : ''; ?>>
-                                                                            10</option>
-                                                                        <option value="11"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 11) ? 'selected' : ''; ?>>
-                                                                            11</option>
-                                                                        <option value="12"
-                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 12) ? 'selected' : ''; ?>>
-                                                                            12</option>
-                                                                    </select>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <label for="minutes" class="form-label">Select
-                                                                        minutes</label>
-                                                                    <select name="minutes" class="form-select"
-                                                                        id="time-1" required>
-                                                                        <option value="" disabled selected>Select Time
-                                                                            duration
-                                                                        </option>
-                                                                        <option value="00"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '00') ? 'selected' : ''; ?>>
-                                                                            00</option>
-                                                                        <option value="05"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '05') ? 'selected' : ''; ?>>
-                                                                            05</option>
-                                                                        <option value="10"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '10') ? 'selected' : ''; ?>>
-                                                                            10</option>
-                                                                        <option value="15"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '15') ? 'selected' : ''; ?>>
-                                                                            15</option>
-                                                                        <option value="20"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '20') ? 'selected' : ''; ?>>
-                                                                            20</option>
-                                                                        <option value="25"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '25') ? 'selected' : ''; ?>>
-                                                                            25</option>
-                                                                        <option value="30"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '30') ? 'selected' : ''; ?>>
-                                                                            30</option>
-                                                                        <option value="35"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '35') ? 'selected' : ''; ?>>
-                                                                            35</option>
-                                                                        <option value="40"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '40') ? 'selected' : ''; ?>>
-                                                                            40</option>
-                                                                        <option value="45"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '45') ? 'selected' : ''; ?>>
-                                                                            45</option>
-                                                                        <option value="50"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '50') ? 'selected' : ''; ?>>
-                                                                            50</option>
-                                                                        <option value="55"
-                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '55') ? 'selected' : ''; ?>>
-                                                                            55</option>
-                                                                    </select>
-                                                                </div>
-
-
-                                                            </div>
-
-                                                            <div class="md-6">
-                                                                <div class="mb-3">
-                                                                    <label for="task" class="form-label">Enter task
-                                                                        commit
-                                                                        id</label>
-                                                                    <input type="text" name="commit_id"
-                                                                        class="form-control"
-                                                                        value="<?php echo $p['commit_id']; ?>"
-                                                                        id="task-1">
-                                                                </div>
-                                                            </div>
-
-
-                                                        </div>
-                                                        <input type="hidden" name="update_id"
-                                                            value="<?php echo $p['update_id']; ?>">
-                                                        <div>
-                                                            <button type="submit" name="editupdate"
-                                                                class="btn it">Submit</button>
-                                                        </div>
+                                                    <input type="hidden" name="update_id"
+                                                        value="<?php echo $p['update_id']; ?>">
+                                                    <div>
+                                                        <button type="submit" name="editupdate"
+                                                            class="btn it">Submit</button>
                                                     </div>
-                                            </form>
-                                        </div>
+                                                </div>
+                                        </form>
                                     </div>
                                 </div>
-                                <!-- Includ Delete Confirmation Modal -->
+                            </div>
+                            <!-- Includ Delete Confirmation Modal -->
                             </span>
-                        </td>
-                    </tr>
-                    <tr class="total-row">
-                        <!-- <td colspan="6">
+                            </td>
+                        </tr>
+                        <tr class="total-row">
+                            <!-- <td colspan="6">
                     <strong>Total Hours for <?php echo $date; ?>:</strong>
                     <?php echo sprintf('%02d:%02d', $totalsByDate[$date]['hours'], $totalsByDate[$date]['minutes']); ?>
                 </td> -->
-                    </tr>
-                    <?php } ?>
-                    <?php } ?>
-                </tbody>
-            </table>
+                        </tr>
+                        <?php } ?>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 
 
 
@@ -420,109 +486,109 @@ foreach ($totalsByDate as $date => &$total) {
 
 
 
-    <div class="modal fade" id="createMeetingModal" tabindex="-1" aria-labelledby="createMeetingModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span></span>
-                    <h3 class="modal-title" id="createMeetingModalLabel"><b>Submit Update</b> </h3>
-                    <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="30px"
-                        viewBox="0 -960 960 960" width="30px" fill="#565656" style="cursor:pointer;">
-                        <path
-                            d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-                    </svg>
+        <div class="modal fade" id="createMeetingModal" tabindex="-1" aria-labelledby="createMeetingModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span></span>
+                        <h3 class="modal-title" id="createMeetingModalLabel"><b>Submit Update</b> </h3>
+                        <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="30px"
+                            viewBox="0 -960 960 960" width="30px" fill="#565656" style="cursor:pointer;">
+                            <path
+                                d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                        </svg>
 
-                </div>
-                <form class="modal-form" method="POST" action="addupdates2.php">
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="md-6">
-                                <div class="mb-3">
-                                    <label for="date" class="form-label">Select Date</label>
-                                    <input type="date" name="date" class="form-control" placeholder="dd-mm-yyyy"
-                                        required>
-                                </div>
-                            </div>
-                            <div class="md-6">
-                                <div class="mb-3">
-                                    <label for="project" class="form-label">Select Project</label>
-                                    <select name="projects" id="projects" class="form-select" required>
-                                        <option value="" disabled selected>Select project</option>
-                                        <?php foreach ($projects as $p): ?>
-                                        <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div id="input-container">
-                            <!-- Initial task-time pair -->
-                            <div class="row task-time-container">
+                    </div>
+                    <form class="modal-form" method="POST" action="addupdates2.php">
+                        <div class="modal-body">
+                            <div class="row">
                                 <div class="md-6">
                                     <div class="mb-3">
-                                        <label for="task" class="form-label">Enter task description</label>
-                                        <textarea name="task[]" class="form-control" id="task-1"
-                                            placeholder="Enter task" required></textarea>
+                                        <label for="date" class="form-label">Select Date</label>
+                                        <input type="date" name="date" class="form-control" placeholder="dd-mm-yyyy"
+                                            required>
                                     </div>
-
                                 </div>
-
-                                <div class="my-row">
-                                    <div class="mb-3">
-                                        <label for="hours" class="form-label">Select hours</label>
-                                        <select name="hours[]" class="form-select" id="time-1" required>
-                                            <option value="" disabled selected>Select Time duration</option>
-                                            <!-- Generate options from 1 to 12 -->
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                            <option value="7">7</option>
-                                            <option value="8">8</option>
-                                            <option value="9">9</option>
-                                            <option value="10">10</option>
-                                            <option value="11">11</option>
-                                            <option value="12">12</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="minutes" class="form-label">Select minutes</label>
-                                        <select name="minutes[]" class="form-select" id="time-1" required>
-                                            <option value="" disabled selected>Select minute duration</option>
-                                            <!-- Generate options from 5 to 55 in increments of 5 -->
-                                            <option value="00">00</option>
-                                            <option value="05">05</option>
-                                            <option value="10">10</option>
-                                            <option value="15">15</option>
-                                            <option value="20">20</option>
-                                            <option value="25">25</option>
-                                            <option value="30">30</option>
-                                            <option value="35">35</option>
-                                            <option value="40">40</option>
-                                            <option value="45">45</option>
-                                            <option value="50">50</option>
-                                            <option value="55">55</option>
-                                        </select>
-                                    </div>
-
-
-                                </div>
-
                                 <div class="md-6">
                                     <div class="mb-3">
-                                        <label for="task" class="form-label">Enter task commit id</label>
-                                        <input type="text" name="commit_id[]" class="form-control" id="task-1"
-                                            placeholder="Enter commit id">
+                                        <label for="project" class="form-label">Select Project</label>
+                                        <select name="projects" id="projects" class="form-select" required>
+                                            <option value="" disabled selected>Select project</option>
+                                            <?php foreach ($projects as $p): ?>
+                                            <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                 </div>
-                                <!-- <div class="col-md-2">
+
+                            </div>
+
+                            <div id="input-container">
+                                <!-- Initial task-time pair -->
+                                <div class="row task-time-container">
+                                    <div class="md-6">
+                                        <div class="mb-3">
+                                            <label for="task" class="form-label">Enter task description</label>
+                                            <textarea name="task[]" class="form-control" id="task-1"
+                                                placeholder="Enter task" required></textarea>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="my-row">
+                                        <div class="mb-3">
+                                            <label for="hours" class="form-label">Select hours</label>
+                                            <select name="hours[]" class="form-select" id="time-1" required>
+                                                <option value="" disabled selected>Select Time duration</option>
+                                                <!-- Generate options from 1 to 12 -->
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">9</option>
+                                                <option value="10">10</option>
+                                                <option value="11">11</option>
+                                                <option value="12">12</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="minutes" class="form-label">Select minutes</label>
+                                            <select name="minutes[]" class="form-select" id="time-1" required>
+                                                <option value="" disabled selected>Select minute duration</option>
+                                                <!-- Generate options from 5 to 55 in increments of 5 -->
+                                                <option value="00">00</option>
+                                                <option value="05">05</option>
+                                                <option value="10">10</option>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="25">25</option>
+                                                <option value="30">30</option>
+                                                <option value="35">35</option>
+                                                <option value="40">40</option>
+                                                <option value="45">45</option>
+                                                <option value="50">50</option>
+                                                <option value="55">55</option>
+                                            </select>
+                                        </div>
+
+
+                                    </div>
+
+                                    <div class="md-6">
+                                        <div class="mb-3">
+                                            <label for="task" class="form-label">Enter task commit id</label>
+                                            <input type="text" name="commit_id[]" class="form-control" id="task-1"
+                                                placeholder="Enter commit id">
+                                        </div>
+                                    </div>
+                                    <!-- <div class="col-md-2">
                                 <div class="mb-3">
                            
                                 <button type="button"  class="btn  btn-danger ites delete-btn" >
@@ -531,22 +597,22 @@ foreach ($totalsByDate as $date => &$total) {
     </svg>
  
 </button></div> -->
+                                </div>
                             </div>
-                        </div>
 
-                    </div>
-                    <!-- <div class="hi">
+                        </div>
+                        <!-- <div class="hi">
                         <button type="button" id="add-inputss-btn" class="btn its" style="border:none; color:blue;">
                             <b> Add Task </b>
                         </button>
                     </div> -->
-                    <div>
-                        <button type="submit" name="submit" class="btn it">Submit</button>
-                    </div>
+                        <div>
+                            <button type="submit" name="submit" class="btn it">Submit</button>
+                        </div>
+                </div>
+                </form>
             </div>
-            </form>
         </div>
-    </div>
     </div>
     <!-- Include modal form -->
     <!-- Your modal code here -->

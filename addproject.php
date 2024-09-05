@@ -282,6 +282,30 @@ body {
     color: rgb(201, 191, 191);
 }
 
+.btn.adde {
+    width: 200px;
+    height: 35px;
+    background-color: #161616 !important;
+    /* Background color for the button */
+    color: #fff;
+    /* Text color for the button */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 5px;
+    /* Rounded corners for the button */
+    text-decoration: none;
+    /* Remove underline from link */
+
+    margin-right: 10px;
+}
+
+.btn.adde:hover {
+    color: rgb(201, 191, 191);
+}
+
 .btn.it:hover {
     color: white;
     background-color: black !important;
@@ -677,6 +701,45 @@ th {
     color: #686D76 !important;
 }
 
+.styled-button {
+    outline: 2px solid #007BFF;
+    /* Blue outline with 2px width */
+
+    border: none;
+    /* Remove default border */
+    padding: 7px 5px;
+    /* Add some padding */
+    background-color: #f8f9fa;
+    /* Light background color */
+    color: #1a273a;
+    /* Text color */
+    cursor: pointer;
+    /* Change cursor to pointer */
+    font-size: 16px;
+    /* Font size */
+    border-radius: 5px;
+    text-decoration:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
+.styled-button:hover {
+    background-color: #e9ecef;
+    /* Change background on hover */
+    border: 1px solid green;
+}
+
+.styled-button svg {
+    margin-right: 8px;
+}
+.hey{
+    display:flex;
+    justify-content:end;
+    margin-bottom:20px;
+}
+
 /* .modal-footer{
     border:none;
 } */
@@ -693,13 +756,18 @@ th {
 
             <div class="space">
                 <b class="aaaa">All Projects</b>
+               
                 <?php if ($_SESSION['role']==1) {?>
                 <a href="#" class="btn added btn-sm" data-bs-toggle="modal" data-bs-target="#createMeetingModal">Add
                     Project</a> <?php }?>
-
+                
+              
             </div>
-
-
+            <div class="hey">
+            <?php if ($_SESSION['role']==1) {?>
+                <a href="view_complete_project.php" class="btn adde btn-sm">View
+                    Complete Project</a> <?php }?>
+            </div>
             <div id="main-table">
                 <table id="projectTable" class="table table-striped">
                     <thead>
@@ -709,18 +777,20 @@ th {
                             <th>CLIENT NAME</th>
                             <?php if ($_SESSION['role']==1) {?>
                             <th>ACTION</th>
+                            <th>STATUS</th>
                             <?php }?>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($projects as $p) { ?>
                         <tr>
+                            <?php if ($p['status']==0){?>
                             <td><?php echo htmlspecialchars($p['project_id']); ?></td>
                             <td><?php echo htmlspecialchars($p['project_name']); ?></td>
                             <td><?php echo htmlspecialchars($p['client_name']); ?></td>
+                            <?php } ?>
 
-
-                            <?php if ($_SESSION['role']==1) {?>
+                            <?php if ($_SESSION['role']==1 && $p['status']==0) {?>
 
                             <td class="spaces">
 
@@ -763,7 +833,8 @@ th {
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content update-modal2">
                                             <div class="modal-header">
-                                                <h3 class="modal-title" id="editMeetingModalLabel">Update Project</h3>
+                                                <span></span>
+                                                <h3 class="modal-title" id="editMeetingModalLabel"><b>Update Project</b></h3>
                                                 <svg data-bs-dismiss="modal" aria-label="Close"
                                                     xmlns="http://www.w3.org/2000/svg" height="30px"
                                                     viewBox="0 -960 960 960" width="30px" fill="#565656"
@@ -869,15 +940,33 @@ th {
                                                     <input type="hidden" name="delete_project_id"
                                                         value="<?php echo $p['project_id']; ?>">
                                                     <button type="submit" class="btn btn-danger">Delete</button>
+
                                                 </form>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             </td>
+                            <?php if ($_SESSION['role'] == 1 && $p['status'] == 0) { ?>
+                            <td>
+                                <a class="styled-button"
+                                href="update_completed_project.php?id=<?php echo htmlspecialchars($p['project_id']); ?> ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                        width="24px" fill="#5f6368">
+                                        <path
+                                            d="M360-120q-100 0-170-70t-70-170v-240q0-100 70-170t170-70h240q100 0 170 70t70 170v240q0 100-70 170t-170 70H360Zm80-200 240-240-56-56-184 184-88-88-56 56 144 144Zm-80 120h240q66 0 113-47t47-113v-240q0-66-47-113t-113-47H360q-66 0-113 47t-47 113v240q0 66 47 113t113 47Zm120-280Z" />
+                                    </svg>
+                                    completed
+                                </a>
+                            </td>
+                            <?php } ?>
+
                         </tr>
                         <?php } ?>
+
                     </tbody>
+
                 </table>
             </div>
         </div>
