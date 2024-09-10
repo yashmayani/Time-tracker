@@ -81,6 +81,13 @@ select {
     <div class="item-wrapper">
         <img class="login-logo" src="./site_img/podev logo.png" width='200px' alt="Screenshot"
             style="margin-bottom:52px;">
+            <?php if ($_SESSION['role']==1) {?>
+            <a href="home.php" class="sidebar-a <?php if ($current_page == 'home.php') echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == 'home.php') echo 'active'; ?>">
+              Home
+            </div>
+        </a>
+        <?php }?>
         <a href="dashboard.php" class="sidebar-a <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
             <div class="sidebar-item <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
                 Update
@@ -98,6 +105,11 @@ select {
             </div>
         </a>
         <?php }?> 
+        <a href="leave.php" class="sidebar-a <?php if ($current_page == 'leave.php') echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == 'leave.php') echo 'active'; ?>">
+               Leave
+            </div>
+        </a>
     </div>
 
     <div class="">

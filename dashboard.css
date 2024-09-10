@@ -328,13 +328,74 @@ table {
   margin-right:13px;
   font-size: 20px;
 }
+.yessh{
+  color:#3365da !important;
+  background-color: white ;
+  border-radius: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 100px;
+  padding: 3px;
+  margin-right:13px;
+  font-size: 50px;
+}
+.emails{
+  font-size: 25px;
+  display: flex;
+  align-items: center;
+}
+
 .as{
  
   font-size:20px;
 }
+
+.userdetails-box {
+  background-color:#3365da; /* Background color with opacity */
+  padding: 20px; /* Space inside the box */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for a 3D effect */
+  width: 100%; /* Adjust width to fit content */
+  max-width: 100%; /* Ensure it doesn't exceed the container width */
+  margin-bottom: 10px; /* Space around the box */
+display: flex;
+justify-content: space-between;
+}
+.view{
+  display: flex;
+  justify-content: end;
+  margin-bottom:2%;
+}
+.userdetails {
+  font-family: Arial, sans-serif; /* Optional: Font style for the details */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.aaaa {
+  display: block; /* Make each detail appear on a new line */
+  margin-bottom: 8px; /* Space between each detail */
+}
+
 .ass{
   font-size: 15px;
   font-weight: 100;
+}
+#auto-dismiss-alert{
+  width: 393px;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 100000;
+  transform: translateX(-50%);
+}
+.add_employee{
+  display: flex;
+  justify-content: end;
 }
 .sizes{
   display: flex;
@@ -414,11 +475,31 @@ table {
 }
 .aaaa{
   display: flex;
+  flex-direction: column;
   justify-content: start;
   align-items: center;
-  font-size: 40px;
-  color:#3365da;
+  font-size: 25px;
+  color:white;
 }
+.xyz{
+  display: flex;
+  align-items: center;
+
+}
+.userdetails b{
+  font-size: 25px !important;
+  display: flex;
+}
+.userdetails{
+  display: flex;
+  flex-direction: column;
+  justify-content: start !important;
+  align-items:start;
+  color:#6c757d;
+  
+
+}
+
 .ai{
   display: flex;
   justify-content: start;
@@ -427,12 +508,17 @@ table {
   color:#3365da;
  
 }
+.startenddate{
+  display: flex;
+  justify-content: end;
+ margin-bottom: 50px;
+}
 .aii{
   display: flex;
   justify-content: start;
   align-items: center;
   font-size: 20px;
-  color:black;
+  color:#6c757d;
   gap:10px;
 }
 .aiii{
@@ -441,7 +527,7 @@ table {
   align-items: center;
   font-size: 15px;
   color:gray;
-  font-weight: 100;
+  /* font-weight: 100; */
  gap:5px;
 }
 .infotech{

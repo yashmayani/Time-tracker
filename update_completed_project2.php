@@ -8,12 +8,12 @@ $project_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 if ($project_id) {
     // Use a prepared statement to prevent SQL injection
     $stmt = $conn->prepare("UPDATE project SET status = ? WHERE project_id = ?");
-    $status = 1;
+    $status = 0;
     $stmt->bind_param('ii', $status, $project_id);
 
     if ($stmt->execute()) {
         // Set a success message in session
-        $_SESSION['message'] = 'Project marked as completed successfully.';
+        $_SESSION['message'] = 'Project marked as incompleted.';
         $_SESSION['message_type'] = 'success'; // Alert type
     } else {
         // Set an error message in session
@@ -28,6 +28,6 @@ if ($project_id) {
     $_SESSION['message_type'] = 'danger'; // Alert type
 }
 
-header("Location: addproject.php");
+header("Location: view_complete_project.php");
 exit();
 ?>

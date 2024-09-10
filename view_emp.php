@@ -50,8 +50,9 @@ if ($updatedaily_updates) {
 include("navbarss.php");
 
 
-
+$filter=false;
 if (isset($_POST['date_view'])) {
+    $filter=true;
     $emp_id=$_POST['emp_id'];
     $startDate = isset($_POST['start_date']) ? $_POST['start_date'] : '';
     $endDate = isset($_POST['end_date']) ? $_POST['end_date'] : '';
@@ -100,6 +101,9 @@ else{
 $emp_id=$_GET['id'];
 $name=$_GET['name'];
 
+
+
+
 $sql =  $conn->prepare("SELECT 
     du.update_id,
     du.project_id,
@@ -147,7 +151,11 @@ if (isset($_POST['delete'])) {
         echo "Error deleting vehicle.";
     }                                                           
  }
- 
+
+$profile = $conn->query("SELECT * from employees where employee_id = $emp_id")->fetch_all(MYSQLI_ASSOC);
+
+// echo  '<pre>';
+// var_dump($profile);
 ?>
 <?php
 // Assuming $project is an array of records
@@ -177,7 +185,27 @@ foreach ($totalsByDate as $date => &$total) {
     $total['minutes'] = $totalMinutes % 60;
 }
 ?>
+<?php
 
+if (isset($_SESSION['name'])) {
+    // Split the full name into parts
+    $nameParts = explode(' ', $profile[0]['name']);
+    
+    // Initialize variables for initials
+    $firstInitial = '';
+    $lastInitial = '';
+
+    // Check if there are at least two parts
+    if (count($nameParts) >= 2) {
+        // Get the first letter of the first name
+        $firstInitial = substr($nameParts[0], 0, 1);
+        // Get the first letter of the last name
+        $lastInitial = substr($nameParts[1], 0, 1);
+    }
+
+    // Output the initials
+} 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -199,34 +227,67 @@ foreach ($totalsByDate as $date => &$total) {
 
             <div class="space">
 
-                <b class="aaaa"><?php if(isset($_GET['name'])){echo $_GET['name'];}else{echo $_POST['name'];}?></b>
+                <div class="userdetails-box d-flex">
+                    <div class="xyz">
+                        <div class="yessh">
+                            <b> <?php echo htmlspecialchars($firstInitial . $lastInitial); ?></b>
+                        </div>
+                        <div class="userdetails">
 
-                <form action="view_emp.php" method="post">
-                    <label for="start_date">Start Date:</label>
-                    <input type="date" id="start_date" name="start_date"
-                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>"
-                        required>
+                            <b class="aaaa"> <?php echo $profile[0]['name']; ?> </b>
 
-                    <label for="end_date">End Date:</label>
-                    <input type="date" id="end_date" name="end_date"
-                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>"
-                        required>
-                    <input type="hidden" name='emp_id'
-                        value='<?php if(isset($_GET['id'])){echo $_GET['id'];}else{echo $_POST['emp_id'];}?>'/>
 
-                        <input type="hidden" name='name'
-                        value='<?php if(isset($_GET['name'])){echo $_GET['name'];}else{echo $_POST['name'];}?>'/>
+                            <b class="aaaa"><?php echo $profile[0]['position']; ?></b>
+                        </div>
+                    </div>
+                
+                    <div class="emails">
+                        <b class="aaaa"><svg xmlns="http://www.w3.org/2000/svg" height="50px" viewBox="0 -960 960 960" width="50px" fill="white"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"/></svg> <?php echo $profile[0]['email']; ?></b>
+                    </div>
 
-                        <input type="submit" name='date_view' value="Filter">
-                </form>
+                </div>
+
+
+
+
+
+
 
 
             </div>
-            <div id="main-table">
+            <div class="view">
+                <button id="toggleButton" class="btn btn-success" onclick="toggleVisibility()"> <svg
+                        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="white">
+                        <path
+                            d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+                    </svg><b>View</b></button>
+            </div>
+            <div class="startenddate" id="start-and-end-date">
+                <form action="view_emp.php" method="post">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date"
+                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>" required>
 
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date"
+                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>" required>
+                    <input type="hidden" name='emp_id'
+                        value='<?php if(isset($_GET['id'])){echo $_GET['id'];}else{echo $_POST['emp_id'];}?>' />
+
+                    <input type="hidden" name='name'
+                        value='<?php if(isset($_GET['name'])){echo $_GET['name'];}else{echo $_POST['name'];}?>' />
+
+                    <input type="submit" name='date_view' value="Filter">
+                </form>
+            </div>
+
+            <div id="main-table">
 
                 <table id="vehicleTable" class="table table-striped">
                     <thead>
+
+
                         <tr>
 
                             <th>UPDATE</th>
@@ -616,8 +677,33 @@ foreach ($totalsByDate as $date => &$total) {
     </div>
     <!-- Include modal form -->
     <!-- Your modal code here -->
+    <script>
+    let is_open = <?php echo $filter ? 'true' : 'false'; ?>;
+    var myTaskDiv = document.getElementById('main-table');
+    var myTaskDiv2 = document.getElementById('start-and-end-date');
 
+    if (is_open) {
+        myTaskDiv.style.display = 'block';
+        myTaskDiv2.style.display = 'flex';
+    } else {
+        myTaskDiv.style.display = 'none';
+        myTaskDiv2.style.display = 'none';
+    }
 
+    function toggleVisibility() {
+        if (myTaskDiv.style.display === 'none') {
+            myTaskDiv.style.display = 'block';
+        } else {
+            myTaskDiv.style.display = 'none';
+        }
+
+        if (myTaskDiv2.style.display === 'none') {
+            myTaskDiv2.style.display = 'flex';
+        } else {
+            myTaskDiv2.style.display = 'none';
+        }
+    }
+    </script>
     <!-- Bootstrap JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous">

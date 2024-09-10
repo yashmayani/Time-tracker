@@ -17,7 +17,8 @@ if(isset($_POST['addemployee'])){
     
     // print_r($project);
     if ($addproject) {
-        echo "User add vehicle successful."; // Set success message
+        // echo "User add vehicle successful."; 
+        $_SESSION['message'] = "Employee Added successfully.";
         header("Location: employee.php"); // Redirect to registrationform.php
   
       } else {

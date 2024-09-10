@@ -29,6 +29,9 @@ session_start();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
     <link rel="stylesheet" href="dashboard.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
     <style>
         
 .btn-outline-primary {
@@ -61,7 +64,14 @@ session_start();
     color: white;
     /* Text color on hover/focus/active */
 }
-
+#auto-dismiss-alert{
+    width: 320px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    z-index: 100000;
+    transform: translateX(-50%);
+ }
         </style>
 </head>
 
@@ -76,7 +86,21 @@ session_start();
 
             </div>
         </div>
-
+        <?php 
+    if (isset($_SESSION['message'])) {
+        // Determine the alert type based on the message
+        $alertType = isset($_SESSION['message_type']) ? $_SESSION['message_type'] : 'info'; // Default to 'info'
+        echo "<div id='auto-dismiss-alert' class='alert alert-$alertType alert-dismissible fade show' role='alert'>
+                {$_SESSION['message']}
+                <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+              </div>";
+        // Clear the message and type from the session
+        unset($_SESSION['message']);
+        unset($_SESSION['message_type']);
+    }
+?>
         <div id="main-table">
             <table id="projectTable" class="table table-striped">
                 <thead>
@@ -99,36 +123,56 @@ session_start();
             <?php } ?>
             <?php if ($p['status']==1 ){?>
             <td class="spaces">
+            <div class="dropdown">
+                                    <a class="btn" data-bs-toggle="dropdown">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                            width="24px" fill="#5f6368">
+                                            <path
+                                                d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
+                                        </svg>
+                                    </a>
+
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item"
+                                                href="view_project.php?id=<?php echo htmlspecialchars($p['project_id']); ?>">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px"
+                                                    viewBox="0 -960 960 960" width="24px" class="icon">
+                                                    <path
+                                                        d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+                                                </svg>
+                                                <b style="margin-left: 5px;">View</b>
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="func(e)"
+                                                class="btn btn-outline-success " data-bs-toggle="modal"
+                                                data-bs-target="#editMeetingModal<?php echo $p['project_id']; ?>"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" height="24px"
+                                                    viewBox="0 -960 960 960" width="24px" class="icon">
+                                                    <path
+                                                        d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+                                                </svg><b style="margin-left:7px;">Edit</b></a></li>
+                                        <li><a class="dropdown-item" href="#" button type="button"
+                                                class="btn btn-outline-danger delete-btn"
+                                                data-id="<?php echo $p['project_id']; ?>" data-bs-toggle="modal"
+                                                data-bs-target="#deleteConfirmationModal<?php echo $p['project_id']; ?>">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px"
+                                                    viewBox="0 -960 960 960" width="24px" class="icon">
+                                                    <path
+                                                        d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                                                </svg>
+                                                <b style="margin-left:5px;">Delete</b>
+                                                </button></a></li>
+                                                <?php if ($_SESSION['role'] == 1 && $p['status'] == 1) { ?>
+                                                    
+                                                    <li><a class="dropdown-item" 
+                                        href="update_completed_project2.php?id=<?php echo htmlspecialchars($p['project_id']); ?> ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="black"><path d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/></svg>
+                                       <b style="margin-left:5px;"> Mark as uncompleted</b>
+                                    </a></li>
+                                    <?php } ?>
+                                                </ul>
+                                </div>
 
 
-<a class="btn btn-outline-primary"
-    href="view_project.php?id=<?php echo htmlspecialchars($p['project_id']); ?>">
-    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-        width="24px" class="icon">
-        <path
-            d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
-    </svg>
-    <b>View</b>
-</a>
-
-
-<a href="#" onclick="func(e)" class="btn btn-outline-success " data-bs-toggle="modal"
-    data-bs-target="#editMeetingModal<?php echo $p['project_id']; ?>"><svg
-        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-        width="24px" class="icon">
-        <path
-            d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
-    </svg><b>Edit</b></a>
-<button type="button" class="btn btn-outline-danger delete-btn"
-    data-id="<?php echo $p['project_id']; ?>" data-bs-toggle="modal"
-    data-bs-target="#deleteConfirmationModal<?php echo $p['project_id']; ?>">
-    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-        width="24px" class="icon">
-        <path
-            d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-    </svg>
-    Delete
-</button>
 
 <?php }?>
 <div class="modal fade" id="editMeetingModal<?php echo $p['project_id']; ?>"
@@ -260,7 +304,26 @@ session_start();
             </tbody>
             </table>
 
+            <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the alert element
+        var alertElement = document.getElementById('auto-dismiss-alert');
+        
+        if (alertElement) {
+            // Set a timeout to dismiss the alert after 2 seconds
+            setTimeout(function() {
+                // Remove the alert element
+                $(alertElement).alert('close');
+            }, 2000); // 2000 milliseconds = 2 seconds
+        }
+    });
+</script>
+    
+</script>
 
+                    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
             <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
                 integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"

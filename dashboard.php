@@ -130,8 +130,33 @@ foreach ($totalsByDate as $date => &$total) {
     $total['hours'] = floor($totalMinutes / 60);
     $total['minutes'] = $totalMinutes % 60;
 }
-?>
 
+?>
+<?php 
+
+$eid=$_SESSION['employee_id'];
+
+$select_project_id = $conn->query("SELECT project_id from project_assign where employee_id = $eid ")->fetch_all(MYSQLI_ASSOC);
+// print_r('<pre>');
+// var_dump($select_project_id);
+
+$allIds = [];
+foreach ($select_project_id as $pro) {
+    $allIds[] = $pro['project_id'];
+}
+
+
+if(count($allIds)>0){
+    $idsString = implode(',', $allIds);
+    $formattedIds = "($idsString)";
+    $selected_project = $conn->query("SELECT * FROM project where project_id in $formattedIds")->fetch_all(MYSQLI_ASSOC);
+}
+else{
+    $selected_project=[];
+}
+//   print_r('<pre>');
+//  var_dump($selected_project);
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -312,7 +337,7 @@ foreach ($totalsByDate as $date => &$total) {
                                                                     class="form-select" required>
                                                                     <option value="<?php echo $p['project_id']; ?>"
                                                                         disabled selected>Select project</option>
-                                                                    <?php foreach ($projects as $s): ?>
+                                                                    <?php foreach ($selected_project as $s): ?>
                                                                     <option
                                                                         <?php if($s['project_id']==$p['project_id']){echo 'selected';} ?>
                                                                         value="<?= $s['project_id'] ?>">
@@ -525,9 +550,20 @@ foreach ($totalsByDate as $date => &$total) {
                                     <label for="project" class="form-label">Select Project</label>
                                     <select name="projects" id="projects" class="form-select" required>
                                         <option value="" disabled selected>Select project</option>
-                                        <?php foreach ($projects as $p): ?>
+                                        
+                                        <?php foreach ($selected_project as $p): ?>
+                                            <?php if ($_SESSION['role'] == 0  && $p['status'] == 0)  { ?>
                                         <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
+                                        <?php } ?>
                                         <?php endforeach; ?>
+                                        
+                                        
+                                        <?php foreach ($projects as $p): ?>
+                                            <?php if ($_SESSION['role'] == 1 && $p['status'] == 0) { ?>
+                                        <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
+                                        <?php } ?>
+                                        <?php endforeach; ?>
+                                        
                                     </select>
                                 </div>
                             </div>
