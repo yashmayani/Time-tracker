@@ -82,7 +82,7 @@ session_start();
 
         <div class="content">
             <div class="space">
-                <b class="aaaa">Completed Project</b>
+                <b class="a">Completed Project</b>
 
             </div>
         </div>

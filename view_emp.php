@@ -101,7 +101,8 @@ else{
 $emp_id=$_GET['id'];
 $name=$_GET['name'];
 
-
+$date = date("Y-m-d");
+$week = date('Y-m-d', strtotime($date .' -1 week'));
 
 
 $sql =  $conn->prepare("SELECT 
@@ -121,8 +122,12 @@ JOIN
 ON 
     du.project_id = p.project_id
     WHERE 
-        du.employee_id = ? ");
-$sql->bind_param("s", $emp_id);
+        du.employee_id = ?
+         AND
+        du.date >= ?
+        ORDER BY 
+    du.date DESC, du.hour DESC, du.minute DESC") ;
+$sql->bind_param("ss", $emp_id ,$week);
 $sql->execute();
 $result = $sql->get_result();
 $project = $result->fetch_all(MYSQLI_ASSOC);
@@ -265,20 +270,20 @@ if (isset($_SESSION['name'])) {
             </div>
             <div class="startenddate" id="start-and-end-date">
                 <form action="view_emp.php" method="post">
-                    <label for="start_date">Start Date:</label>
+                    <label for="start_date"><b>Start Date : </b></label>
                     <input type="date" id="start_date" name="start_date"
-                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>" required>
+                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>" required class="date-input">
 
-                    <label for="end_date">End Date:</label>
+                    <label for="end_date"><b>End Date : </b></label>
                     <input type="date" id="end_date" name="end_date"
-                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>" required>
+                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>" required class="date-input">
                     <input type="hidden" name='emp_id'
                         value='<?php if(isset($_GET['id'])){echo $_GET['id'];}else{echo $_POST['emp_id'];}?>' />
 
                     <input type="hidden" name='name'
                         value='<?php if(isset($_GET['name'])){echo $_GET['name'];}else{echo $_POST['name'];}?>' />
 
-                    <input type="submit" name='date_view' value="Filter">
+                    <input type="submit" name='date_view' value="Filter" class="filter-button">
                 </form>
             </div>
 

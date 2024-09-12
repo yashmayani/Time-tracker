@@ -105,8 +105,8 @@ select {
             </div>
         </a>
         <?php }?> 
-        <a href="leave.php" class="sidebar-a <?php if ($current_page == 'leave.php') echo 'active'; ?>">
-            <div class="sidebar-item <?php if ($current_page == 'leave.php') echo 'active'; ?>">
+        <a href="leaves.php" class="sidebar-a <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
                Leave
             </div>
         </a>

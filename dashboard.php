@@ -177,7 +177,7 @@ else{
             <!-- Your main content goes here -->
 
             <div class="space">
-                <b class="aaaa">Daily Update</b>
+                <b class="a">Daily Update</b>
                 <a href="#" class="btn added btn-sm" data-bs-toggle="modal" data-bs-target="#createMeetingModal">Add
                     Update</a>
             </div>
@@ -187,8 +187,8 @@ else{
                 <form action="dashboard.php" method="post">
                     <input type="date" id="date"
                         value="<?php echo isset($_POST['date']) ? htmlspecialchars($_POST['date']) : ''; ?>" name="date"
-                        required>
-                    <input type="submit" name='date_view' value="filter">
+                        required  class="date-input">
+                    <input type="submit" name='date_view' value="filter" class="filter-button">
                 </form>
                 <!-- <input type="date" name="date" data-date="" class="addid" required> -->
 

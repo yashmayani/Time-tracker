@@ -5,10 +5,11 @@ include("./config.php");
 
 if (isset($_POST['delete_project_id'])) {
     $project_id_to_delete = intval($_POST['delete_project_id']);
+    $project_id = intval($_POST['project_id']);
 
     // Prepare and execute deletion query
-    $stmt = $conn->prepare("DELETE FROM project_assign WHERE employee_id = ?");
-    $stmt->bind_param("i", $project_id_to_delete);
+    $stmt = $conn->prepare("DELETE FROM project_assign WHERE employee_id = ? and project_id = ?");
+    $stmt->bind_param("ii", $project_id_to_delete,$project_id);
 
     if ($stmt->execute()) {
         $_SESSION['message'] = "Employee deleted successfully.";

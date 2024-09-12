@@ -11,9 +11,9 @@ $add_employee=$conn->query("SELECT * from employees")->fetch_all(MYSQLI_ASSOC);
 
 if (isset($_POST['delete'])) {
     $vehicle_id_to_delete = $_POST['delete_project_id'];
-
+    
     // Perform your deletion query here
-    $delete_query = "DELETE FROM project_assign WHERE employee_id = $vehicle_id_to_delete";
+    $delete_query = "DELETE FROM project_assign WHERE employee_id = $vehicle_id_to_delete ";
     $result = $conn->query($delete_query);
     // var_dump($dele);
     if ($result) {
@@ -141,7 +141,7 @@ include("./sidebar.php");
    <a href="#" class="btn added btn-sm" data-bs-toggle="modal" data-bs-target="#createMeetingModal">Add
                     Employee</a></div>
         <div id="main-table">
-            <table id="projectTable" class="table table-striped">
+            <table id="projectTable" class="table table-striped" style="margin-top:25px;">
                 <thead>
                     <tr>
                         <th>EMPLOYEE ID</th>
