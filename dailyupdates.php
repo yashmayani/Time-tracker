@@ -314,7 +314,7 @@ ON
             </div>
             <hr style="border:1px solid black !important;">
 
-            <table id="vehicleTable" class="table table-striped" style="width:100%">
+            <table id="vehicleTable" class="table " style="width:100%">
                 <thead>
                     <tr>
                         <th>DATE</th>

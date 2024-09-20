@@ -102,7 +102,7 @@ session_start();
     }
 ?>
         <div id="main-table">
-            <table id="projectTable" class="table table-striped">
+            <table id="projectTable" class="table ">
                 <thead>
                     <tr>
                         <th>PROJECT ID</th>

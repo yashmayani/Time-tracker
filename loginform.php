@@ -3,7 +3,7 @@ session_start();
 include("./config.php");
 
 if (isset($_SESSION['user_id'])) {
-    header("Location:dashboard.php"); 
+    header("Location:home.php"); 
 }  
 
 if(isset($_SESSION['message'])) {

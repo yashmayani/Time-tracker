@@ -132,42 +132,10 @@ if (($_SESSION['role']==1)) {
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
 </head>
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
-
-.navbar-item {
-    font-family: "Rubik", sans-serif !important;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+body *{
+  font-family: "Montserrat", sans-serif !important;
 }
-
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
-
-.fonts {
-    font-family: "Rubik", sans-serif !important;
-    font-size: 50px;
-}
-
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
-
-.btn.added {
-    font-family: "Rubik", sans-serif !important;
-}
-
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
-
-.as {
-    font-family: "Rubik", sans-serif !important;
-}
-
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
-
-body {
-    font-family: "Rubik", sans-serif !important;
-}
-
-.DSDS {
-    font-family: "Rubik", sans-serif !important;
-    font-size: 25px !important;
-}
-
 /* styles.css */
 
 /* Basic reset */
@@ -206,7 +174,7 @@ body {
 }
 
 .sidebar-item:hover {
-    background-color: #3365da;
+    background-color: rgba(231, 185, 0, 1);
     padding: 10px;
     border-radius: 5px;
 }
@@ -214,7 +182,7 @@ body {
 /* Main content styles */
 .main-content {
     margin-left: 250px;
-    margin-top: 100px;
+    margin-top: 70px;
     background-color: #fff;
     overflow-y: auto;
 }
@@ -240,9 +208,9 @@ body {
 }
 
 /* Content area */
-.content {
+/* .content {
     padding: 20px;
-}
+} */
 
 .hi {
     border: -4px solid rgba(255, 255, 255, 1);
@@ -258,6 +226,7 @@ body {
 .main-nav {
     border-bottom: 1px solid rgba(146, 141, 141, 0.651) !important;
 }
+
 
 .btn.added {
     width: 150px;
@@ -315,13 +284,16 @@ body {
 .space {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .spaces {
     display: flex;
     gap: 10px;
 }
-
+#main-table{
+    margin-top: 30px;
+}
 /* Basic reset for margin and padding */
 body,
 table {
@@ -335,7 +307,6 @@ table {
 .table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 40px;
     /* Collapses the table borders */
 }
 
@@ -367,10 +338,6 @@ table {
     /* Remove border from the last row */
 }
 
-.table-striped tbody tr {
-    background-color: #fff;
-    /* White background for all rows */
-}
 
 .main-content {
     padding: 20px;
@@ -496,7 +463,7 @@ table {
 
 .sidebar-item.active {
     border-radius: 10px 0 0px 10px !important;
-    background-color: #3365da;
+    background-color: rgba(231, 185, 0, 1);
 }
 
 .sidebar-item a {
@@ -508,7 +475,7 @@ table {
 
 .sidebar-a:hover .sidebar-item,
 .sidebar-a.active .sidebar-item {
-    color: white !important;
+    color:black !important;
 }
 
 
@@ -653,7 +620,7 @@ table {
     justify-content: start;
     align-items: center;
     font-size: 40px;
-    color: #3365da;
+    color: black    ;
 }
 
 #main-table {
@@ -726,11 +693,11 @@ th {
 
 }
 
-.styled-button:hover {
+/* .styled-button:hover { */
     /* background-color: #e9ecef; */
     /* Change background on hover */
     /* border: 1px solid green; */
-}
+/* } */
 
 /* .styled-button svg {
     margin-right: 8px;
@@ -752,6 +719,9 @@ th {
     left: 50%;
     z-index: 100000;
     transform: translateX(-50%);
+}
+.sidebar-img {
+    margin-right: 10px; /* Adjust this value as needed */
 }
 </style>
 
@@ -796,7 +766,8 @@ th {
                     Complete Project</a> <?php }?>
             </div>
             <div id="main-table">
-                <table id="projectTable" class="table table-striped">
+            <!-- <table id="projectTable" class="table table-striped"> -->
+                <table id="projectTable" class="table">
                     <thead>
                         <tr>
                             <th>PROJECT ID</th>
@@ -890,13 +861,8 @@ th {
                                                 <span></span>
                                                 <h3 class="modal-title" id="editMeetingModalLabel"><b>Update Project</b>
                                                 </h3>
-                                                <svg data-bs-dismiss="modal" aria-label="Close"
-                                                    xmlns="http://www.w3.org/2000/svg" height="30px"
-                                                    viewBox="0 -960 960 960" width="30px" fill="#565656"
-                                                    style="cursor:pointer;">
-                                                    <path
-                                                        d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-                                                </svg>
+                                                <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368" style="cursor:pointer;"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+
                                             </div>
 
                                             <form class="modal-form" method="POST" action="addproject.php">
@@ -1038,11 +1004,8 @@ th {
                     <div class="modal-header">
                         <span></span>
                         <h3 class="modal-title" id="createMeetingModalLabel"><b>Add project</b> </h3>
-                        <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="30px"
-                            viewBox="0 -960 960 960" width="30px" fill="#565656" style="cursor:pointer;">
-                            <path
-                                d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-                        </svg>
+                        <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368" style="cursor:pointer;"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+
 
                     </div>
                     <form class="modal-form" method="POST" action="addproject2.php">

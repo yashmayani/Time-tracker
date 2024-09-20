@@ -5,10 +5,64 @@ session_start();
 
 
 include("./config.php");
-include("navbar.php");
-include("sidebar.php"); 
 
-$employee = $conn->query("SELECT * FROM employees")->fetch_all(MYSQLI_ASSOC);
+
+$currentDate = date('Y-m-d H:i:s'); // Get the current date and time
+
+$employee = $conn->query("
+    SELECT emp.*, emp.employee_id AS emp_id, l.*
+    FROM employees AS emp
+    LEFT JOIN leaves AS l ON emp.employee_id = l.employee_id 
+        AND l.from_date <= '$currentDate' 
+        AND l.end_date >= '$currentDate'
+")->fetch_all(MYSQLI_ASSOC);
+
+
+// $employee = $conn->query("
+//     SELECT emp., emp.employee_id as emp_id ,l.
+//     FROM employees AS emp
+//     LEFT JOIN leaves AS l ON emp.employee_id = l.employee_id
+// ")->fetch_all(MYSQLI_ASSOC);
+
+
+
+
+
+if(isset($_POST['updateemployee'])){
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $position = $_POST['position'];
+    $id = $_POST['emp_id'];
+
+
+$updateemployee = $conn->query("UPDATE employees SET name ='$name',email = '$email', position = '$position' WHERE employee_id  ='$id'");
+ var_dump($updateemployee);
+
+if ($updateemployee) {
+    header("Refresh:0");
+    ob_end_flush(); // Flush and turn off output buffering
+    exit;
+} else {
+    echo "Error updating meeting.";
+    ob_end_flush(); // Flush and turn off output buffering
+    exit;
+}
+}
+
+
+
+
+include("navbar.php");
+include("sidebar.php");
+
+
+
+
+
+
+
+
+
 // var_dump($employee);
 $yess =  $conn->query("SELECT 
     du.update_id,
@@ -19,31 +73,37 @@ $yess =  $conn->query("SELECT
     du.minute,
     du.commit_id,
     du.employee_id,
-    p.project_name
+    p.project_name,
+    l.from_date,
+    l.end_date
 FROM 
     daily_updates AS du
 JOIN 
     project AS p
 ON 
-    du.project_id = p.project_id")->fetch_all(MYSQLI_ASSOC);
-    // echo '<pre>';
-    // var_dump($yess);
-    if (isset($_POST['delete'])) {
-        $vehicle_id_to_delete = $_POST['delete_project_id'];
-    
-        // Perform your deletion query here
-        $delete_query = "DELETE FROM employees WHERE employee_id = $vehicle_id_to_delete";
-        $result = $conn->query($delete_query);
-        // var_dump($dele);
-        if ($result) {
-            // Deletion successful, redirect or show success message
-            header("Location: employee.php");
-            exit();
-        } else {
-            // Deletion failed, handle error
-            echo "Error deleting vehicle.";
-        }
-     }
+    du.project_id = p.project_id
+LEFT JOIN 
+    leaves AS l
+ON 
+    du.employee_id = l.employee_id")->fetch_all(MYSQLI_ASSOC);
+// echo '<pre>';
+// var_dump($employee);
+if (isset($_POST['delete'])) {
+    $vehicle_id_to_delete = $_POST['delete_project_id'];
+
+    // Perform your deletion query here
+    $delete_query = "DELETE FROM employees WHERE employee_id = $vehicle_id_to_delete";
+    $result = $conn->query($delete_query);
+    // var_dump($dele);
+    if ($result) {
+        // Deletion successful, redirect or show success message
+        header("Location: employee.php");
+        exit();
+    } else {
+        // Deletion failed, handle error
+        echo "Error deleting vehicle.";
+    }
+}
 ?>
 
 <!doctype html>
@@ -61,35 +121,35 @@ ON
     <link rel="stylesheet" href="dashboard.css">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Bootstrap CSS v5.2.1 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
     <style>
-    .search-container {
-        position: relative;
-        display: inline-block;
-        width: 20%;
+        .search-container {
+            position: relative;
+            display: inline-block;
+            width: 20%;
 
-    }
+        }
 
-    .search-container input {
-        padding-left: 40px;
-        height: 35px !important;
-        box-shadow: none;
-        border-radius: 7px;
-        border: 1px solid #c6bdbdf5 !important;
-    }
+        .search-container input {
+            padding-left: 40px;
+            height: 35px !important;
+            box-shadow: none;
+            border-radius: 7px;
+            border: 1px solid #c6bdbdf5 !important;
+        }
 
-    .search-container svg {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 24px;
-        /* Adjust size as needed */
-        width: 24px;
-        fill: #c6bdbdf5;
-    }
+        .search-container svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 24px;
+            /* Adjust size as needed */
+            width: 24px;
+            fill: #c6bdbdf5;
+        }
     </style>
 </head>
 
@@ -116,27 +176,28 @@ ON
         </div>
 
         <div id="main-table">
-            <table id="projectTable" class="table table-striped">
-            <?php 
-    if (isset($_SESSION['message'])) {
-        // Determine the alert type based on the message
-        $alertType = isset($_SESSION['message_type']) ? $_SESSION['message_type'] : 'info'; // Default to 'info'
-        echo "<div id='auto-dismiss-alert' class='alert alert-$alertType alert-dismissible fade show' role='alert'>
+            <table id="projectTable" class="table ">
+                <?php
+                if (isset($_SESSION['message'])) {
+                    // Determine the alert type based on the message
+                    $alertType = isset($_SESSION['message_type']) ? $_SESSION['message_type'] : 'info'; // Default to 'info'
+                    echo "<div id='auto-dismiss-alert' class='alert alert-$alertType alert-dismissible fade show' role='alert'>
                 {$_SESSION['message']}
                 <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
                     <span aria-hidden='true'>&times;</span>
                 </button>
               </div>";
-        // Clear the message and type from the session
-        unset($_SESSION['message']);
-        unset($_SESSION['message_type']);
-    }
-?>
+                    // Clear the message and type from the session
+                    unset($_SESSION['message']);
+                    unset($_SESSION['message_type']);
+                }
+                ?>
 
                 <thead>
                     <tr>
-                        <th>EMPLOYEE ID</th>
+                        <!-- <th>EMPLOYEE ID</th> -->
                         <th>NAME</th>
+                        <th>STATUS</th>
                         <th>EMAIL</th>
                         <th>POSITION</th>
                         <th>ACTION</th>
@@ -146,65 +207,74 @@ ON
 
                 <tbody>
                     <?php foreach ($employee as $emp) { ?>
-                    <tr>
+                        <tr>
 
-                        <td><?php echo htmlspecialchars($emp['employee_id']); ?></td>
-                        <td><?php echo htmlspecialchars($emp['name']); ?></td>
-                        <td><?php echo htmlspecialchars($emp['email']); ?></td>
-                        <td><?php echo htmlspecialchars($emp['position']); ?></td>
+                            <!-- <td><?php echo htmlspecialchars($emp['emp_id']); ?></td> -->
 
-
-                        <td class="spaces">
-
-                            <div class="dropdown">
-                                <a class="btn" data-bs-toggle="dropdown">
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                        width="24px" fill="#5f6368">
-                                        <path
-                                            d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
-                                    </svg>
-                                </a>
-
-
-
-
+                            <td><?php echo htmlspecialchars($emp['name']); ?></td>
+                            <?php
+                            $start = $emp['from_date'];
+                            $end = $emp['end_date'];
+                            $fff = date('Y-m-d H:i:s');
+                            $current = $fff;
+                            ?>
+                            <td><?php
+                                if ($current >= $start && $current <= $end && $emp['status'] == '1') {
+                                    echo '<span class="badge badge-danger">On Leave</span>';
+                                } else {
+                                    echo '<span class="badge badge-success">Available</span>';
+                                }
+                                ?></td>
+                            <td><?php echo htmlspecialchars($emp['email']); ?></td>
+                            <td><?php echo htmlspecialchars($emp['position']); ?></td>
 
 
+                            <td class="spaces">
+
+                                <div class="dropdown">
+                                    <a class="btn" data-bs-toggle="dropdown">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                            width="24px" fill="#5f6368">
+                                            <path
+                                                d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
+                                        </svg>
+                                    </a>
 
 
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item"
+                                                href="view_emp.php?id=<?php echo htmlspecialchars($emp['emp_id']); ?>&name=<?php echo urlencode($emp['name']); ?>">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px"
+                                                    viewBox="0 -960 960 960" width="24px" class="icon">
+                                                    <path
+                                                        d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+                                                </svg>
+                                                <b style="margin-left: 5px;">View</b>
+                                            </a></li>
 
-
-
-
-
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item"
-                                            href="view_emp.php?id=<?php echo htmlspecialchars($emp['employee_id']); ?>&name=<?php echo urlencode($emp['name']); ?>">
-                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px"
-                                                viewBox="0 -960 960 960" width="24px" class="icon">
-                                                <path
-                                                    d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
-                                            </svg>
-                                            <b style="margin-left: 5px;">View</b>
-                                        </a></li>
-
-
-                                    <li><a class="dropdown-item" href="#"  button type="button"
-                                            class="btn btn-outline-danger delete-btn"
-                                            data-id="<?php echo $p['update_id']; ?>" data-bs-toggle="modal"
-                                            data-bs-target="#deleteConfirmationModal<?php echo $emp['employee_id']; ?>">
-                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px"
-                                                viewBox="0 -960 960 960" width="24px" class="icon">
-                                                <path
-                                                    d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-                                            </svg>
-                                            <b style="margin-left:5px;">Delete</b>
-                                            </button></a></li>
-                    </ul>
-
-                                    <div class="modal fade"
-                                        id="deleteConfirmationModal<?php echo $emp['employee_id']; ?>" tabindex="-1"
-                                        aria-labelledby="editMeetingModalLabel" aria-hidden="true">
+                                        <li><a class="dropdown-item" href="#" button type="button"
+                                                class="btn btn-outline-success " data-bs-toggle="modal"
+                                                data-bs-target="#editMeetingModal<?php echo $emp['emp_id']; ?>"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" height="24px"
+                                                    viewBox="0 -960 960 960" width="24px" class="icon">
+                                                    <path
+                                                        d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+                                                </svg><b style="margin-left: 5px;">Edit</b></a></li>
+                                        <li><a class="dropdown-item" href="#" button type="button"
+                                                class="btn btn-outline-danger delete-btn"
+                                                data-id="<?php echo $p['update_id']; ?>" data-bs-toggle="modal"
+                                                data-bs-target="#deleteConfirmationModal<?php echo $emp['emp_id']; ?>">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px"
+                                                    viewBox="0 -960 960 960" width="24px" class="icon">
+                                                    <path
+                                                        d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                                                </svg>
+                                                <b style="margin-left:5px;">Delete</b>
+                                                </button></a></li>
+                                    </ul>
+                                </div>
+                                    <div class="modal fade" id="deleteConfirmationModal<?php echo $emp['emp_id']; ?>"
+                                        tabindex="-1" aria-labelledby="editMeetingModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content delete-modal2">
                                                 <div class="modal ">
@@ -235,7 +305,7 @@ ON
                                                         <button type="button" class="btn btn-secondary"
                                                             data-bs-dismiss="modal">Cancel</button>
                                                         <input type="hidden" name="delete_project_id"
-                                                            value="<?php echo $emp['employee_id']; ?>">
+                                                            value="<?php echo $emp['emp_id']; ?>">
                                                         <button type="submit" class="btn btn-danger">Delete</button>
                                                     </form>
                                                 </div>
@@ -243,17 +313,65 @@ ON
                                         </div>
                                     </div>
 
-                        </td>
 
-                    </tr>
+
+                                    <div class="modal fade" id="editMeetingModal<?php echo $emp['emp_id']; ?>"
+                                        tabindex="-1" aria-labelledby="createMeetingModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <span></span>
+                                                    <h3 class="modal-title" id="createMeetingModalLabel"><b>Update
+                                                            Employee</b> </h3>
+                                                            <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368" style="cursor:pointer;"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+
+
+                                                </div>
+                                                <form class="modal-form" method="POST" action="employee.php">
+                                                    <div class="modal-body">
+                                                        <div class="row">
+
+                                                            <div class="md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="project" class="form-label">Name</label>
+                                                                    <input type="text" name="name" class="form-control"
+                                                                       value="<?php echo $emp['name']; ?>"  required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="project" class="form-label">Email</label>
+                                                                    <input type="email" name="email" class="form-control"
+                                                                        value="<?php echo $emp['email']; ?>" required>
+                                                                </div>
+                                                            
+                                                                <div class="mb-3">
+                                                                    <label for="project" class="form-label">Position</label>
+                                                                    <input type="text" name="position" class="form-control"
+                                                                      value="<?php echo $emp['position']; ?>"    required>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <input type="hidden" name="emp_id"
+                                                            value="<?php echo $emp['emp_id']; ?>">
+                                                        <div>
+                                                            <button type="submit" name="updateemployee"
+                                                                class="btn it">Add</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </td>
+
+                        </tr>
                     <?php } ?>
+
                 </tbody>
+
             </table>
         </div>
     </div>
-
-
-
 
 
     <div class="modal fade" id="createMeetingModal" tabindex="-1" aria-labelledby="createMeetingModalLabel"
@@ -263,11 +381,8 @@ ON
                 <div class="modal-header">
                     <span></span>
                     <h3 class="modal-title" id="createMeetingModalLabel"><b>Add Employee</b> </h3>
-                    <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="30px"
-                        viewBox="0 -960 960 960" width="30px" fill="#565656" style="cursor:pointer;">
-                        <path
-                            d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-                    </svg>
+                    <svg data-bs-dismiss="modal" aria-label="Close" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368" style="cursor:pointer;"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+
 
                 </div>
                 <form class="modal-form" method="POST" action="addemployee2.php">
@@ -318,34 +433,34 @@ ON
                             }, 2000); // 2000 milliseconds = 2 seconds
                         }
                     });
-                    </script>
+                </script>
 
-                    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-                    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-                    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+                <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
                 <!-- JavaScript for Search Functionality -->
                 <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const searchInput = document.getElementById('searchInput');
-                    const table = document.getElementById('projectTable');
-                    const rows = table.querySelectorAll('tbody tr');
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const searchInput = document.getElementById('searchInput');
+                        const table = document.getElementById('projectTable');
+                        const rows = table.querySelectorAll('tbody tr');
 
-                    searchInput.addEventListener('input', () => {
-                        const query = searchInput.value.toLowerCase();
-                        rows.forEach(row => {
-                            const cells = row.getElementsByTagName('td');
-                            let match = false;
-                            for (let i = 0; i < cells.length; i++) {
-                                if (cells[i].textContent.toLowerCase().includes(query)) {
-                                    match = true;
-                                    break;
+                        searchInput.addEventListener('input', () => {
+                            const query = searchInput.value.toLowerCase();
+                            rows.forEach(row => {
+                                const cells = row.getElementsByTagName('td');
+                                let match = false;
+                                for (let i = 0; i < cells.length; i++) {
+                                    if (cells[i].textContent.toLowerCase().includes(query)) {
+                                        match = true;
+                                        break;
+                                    }
                                 }
-                            }
-                            row.style.display = match ? '' : 'none';
+                                row.style.display = match ? '' : 'none';
+                            });
                         });
                     });
-                });
                 </script>
 
 

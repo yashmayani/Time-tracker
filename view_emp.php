@@ -14,7 +14,8 @@ $projects = $conn->query("SELECT * FROM project")->fetch_all(MYSQLI_ASSOC);
 
 
 
-if(isset($_POST['editupdate'])){
+
+if (isset($_POST['editupdate'])) {
     $date = $_POST['date'];
     $projects = $_POST['projects'];
     $task = $_POST['task'];
@@ -25,93 +26,144 @@ if(isset($_POST['editupdate'])){
 
 
 
-$updatedaily_updates = $conn->query("UPDATE daily_updates SET date = '$date' , project_id = '$projects', task = '$task', hour = '$hours', minute = '$minutes', commit_id = ' $commit_id ' WHERE update_id = '$id' ");
-// var_dump($date);
-// var_dump($projects);
-// var_dump($task);
-// var_dump($hours);
-// var_dump($minutes);
-// var_dump($commit_id);
+    $updatedaily_updates = $conn->query("UPDATE daily_updates SET date = '$date' , project_id = '$projects', task = '$task', hour = '$hours', minute = '$minutes', commit_id = ' $commit_id ' WHERE update_id = '$id' ");
+    // var_dump($date);
+    // var_dump($projects);
+    // var_dump($task);
+    // var_dump($hours);
+    // var_dump($minutes);
+    // var_dump($commit_id);
 
-ob_start(); // Start output buffering
+    ob_start(); // Start output buffering
 
-if ($updatedaily_updates) {
-    header("Refresh:0");
-    ob_end_flush(); // Flush and turn off output buffering
-    exit;
-} else {
-    echo "Error updating meeting.";
-    ob_end_flush(); // Flush and turn off output buffering
-    exit;
-}
-
-
+    if ($updatedaily_updates) {
+        header("Refresh:0");
+        ob_end_flush(); // Flush and turn off output buffering
+        exit;
+    } else {
+        echo "Error updating meeting.";
+        ob_end_flush(); // Flush and turn off output buffering
+        exit;
+    }
 }
 include("navbarss.php");
 
 
-$filter=false;
+$filter = false;
 if (isset($_POST['date_view'])) {
-    $filter=true;
-    $emp_id=$_POST['emp_id'];
+    $filter = true;
+    $emp_id = $_POST['emp_id'];
     $startDate = isset($_POST['start_date']) ? $_POST['start_date'] : '';
     $endDate = isset($_POST['end_date']) ? $_POST['end_date'] : '';
 
-    if ($startDate && $endDate && $startDate <= $endDate) {
-        $sql = $conn->prepare("
-        SELECT 
-            du.update_id,
-            du.project_id,
-            du.task,
-            du.date,
-            du.hour,
-            du.minute,
-            du.commit_id,
-            du.employee_id,
-            p.project_name
-        FROM 
-            daily_updates AS du
-        JOIN 
-            project AS p
-        ON 
-            du.project_id = p.project_id
-        WHERE 
-            du.employee_id = ? 
-            AND du.date BETWEEN ? AND ?
-    ");
-    
-    // Bind the parameters
-    $sql->bind_param("sss", $emp_id, $startDate, $endDate);
-    
-    // Execute the query
-    $sql->execute();
-    
-    // Get the result
-    $result = $sql->get_result();
-    
-    // Fetch all results as an associative array
-    $project = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Dump the results
-    }
-}
-
-else{
-
-$emp_id=$_GET['id'];
-$name=$_GET['name'];
-
-$date = date("Y-m-d");
-$week = date('Y-m-d', strtotime($date .' -1 week'));
 
 
-$sql =  $conn->prepare("SELECT 
+    $date = date("Y-m-d");
+    $week = date('Y-m-d', strtotime($date . ' -1 week'));
+
+    $now = new DateTime();
+    $firstDayOfCurrentMonth = new DateTime($now->format('Y-m-01'));
+    $lastDayOfCurrentMonth = (clone $firstDayOfCurrentMonth)->modify('last day of this month');
+    $firstDayOfLastMonth = (clone $firstDayOfCurrentMonth)->modify('first day of last month');
+    $lastDayOfLastMonth = (clone $firstDayOfLastMonth)->modify('last day of this month');
+
+    // Format dates for SQL queries
+    $currentMonthStart = $firstDayOfCurrentMonth->format('Y-m-d');
+    $currentMonthEnd = $lastDayOfCurrentMonth->format('Y-m-d');
+    $lastMonthStart = $firstDayOfLastMonth->format('Y-m-d');
+    $lastMonthEnd = $lastDayOfLastMonth->format('Y-m-d');
+
+    $sql =  $conn->prepare("SELECT 
     du.update_id,
     du.project_id,
     du.task,
     du.date,
     du.hour,
     du.minute,
+     SUM(du.hour) OVER (PARTITION BY du.employee_id, du.project_id, du.task, du.date) AS total_hour,
+        SUM(du.minute) OVER (PARTITION BY du.employee_id, du.project_id, du.task, du.date) AS total_minute,
+    du.commit_id,
+    du.employee_id,
+    p.project_name
+FROM 
+    daily_updates AS du
+JOIN 
+    project AS p
+ON 
+    du.project_id = p.project_id
+    WHERE 
+        du.employee_id = ?
+        AND (du.date BETWEEN ? AND ?)
+        ORDER BY 
+    du.date DESC, du.hour DESC, du.minute DESC");
+    $sql->bind_param("sss", $emp_id, $startDate, $endDate);
+    $sql->execute();
+    $result = $sql->get_result();
+    $project = $result->fetch_all(MYSQLI_ASSOC);
+
+    $sqlCurrentMonth = $conn->prepare("
+    SELECT 
+        SUM(du.hour) AS total_hour,
+        SUM(du.minute) AS total_minute
+    FROM 
+        daily_updates AS du
+    JOIN 
+        project AS p
+    ON 
+        du.project_id = p.project_id
+    WHERE 
+        du.employee_id = ?
+        AND du.date BETWEEN ? AND ?
+");
+    $sqlCurrentMonth->bind_param("sss", $emp_id, $currentMonthStart, $currentMonthEnd);
+    $sqlCurrentMonth->execute();
+    $resultCurrentMonth = $sqlCurrentMonth->get_result();
+    $currentMonthTotals = $resultCurrentMonth->fetch_assoc();
+
+    $totalMinutes = $currentMonthTotals['total_minute'];
+    $additionalHours = intdiv($totalMinutes, 60); // Hours derived from minutes
+    $remainingMinutes = $totalMinutes % 60; // Remaining minutes after accounting for hours
+
+    // Add additional hours to the total hours
+    $totalHours = $currentMonthTotals['total_hour'] + $additionalHours;
+
+    // Format the result
+    $formattedHours = $totalHours;
+    $formattedMinutes = str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT); // Ensure minutes are two digits
+
+    // Display the result in HH:MM format
+    $formattedTime = $formattedHours . ' : ' . $formattedMinutes;
+    // Dump the results
+
+} else {
+
+    $emp_id = $_GET['id'];
+    $name = $_GET['name'];
+
+    $date = date("Y-m-d");
+    $week = date('Y-m-d', strtotime($date . ' -1 week'));
+
+    $now = new DateTime();
+    $firstDayOfCurrentMonth = new DateTime($now->format('Y-m-01'));
+    $lastDayOfCurrentMonth = (clone $firstDayOfCurrentMonth)->modify('last day of this month');
+    $firstDayOfLastMonth = (clone $firstDayOfCurrentMonth)->modify('first day of last month');
+    $lastDayOfLastMonth = (clone $firstDayOfLastMonth)->modify('last day of this month');
+
+    // Format dates for SQL queries
+    $currentMonthStart = $firstDayOfCurrentMonth->format('Y-m-d');
+    $currentMonthEnd = $lastDayOfCurrentMonth->format('Y-m-d');
+    $lastMonthStart = $firstDayOfLastMonth->format('Y-m-d');
+    $lastMonthEnd = $lastDayOfLastMonth->format('Y-m-d');
+
+    $sql =  $conn->prepare("SELECT 
+    du.update_id,
+    du.project_id,
+    du.task,
+    du.date,
+    du.hour,
+    sum(du.hour) as total_hour,
+    du.minute,
+    sum(du.minute) as total_minute,
     du.commit_id,
     du.employee_id,
     p.project_name
@@ -126,14 +178,53 @@ ON
          AND
         du.date >= ?
         ORDER BY 
-    du.date DESC, du.hour DESC, du.minute DESC") ;
-$sql->bind_param("ss", $emp_id ,$week);
-$sql->execute();
-$result = $sql->get_result();
-$project = $result->fetch_all(MYSQLI_ASSOC);
+    du.date DESC, du.hour DESC, du.minute DESC");
+    $sql->bind_param("ss", $emp_id, $week);
+    $sql->execute();
+    $result = $sql->get_result();
+    $project = $result->fetch_all(MYSQLI_ASSOC);
+
+
+    $sqlCurrentMonth = $conn->prepare("
+    SELECT 
+        SUM(du.hour) AS total_hour,
+        SUM(du.minute) AS total_minute
+    FROM 
+        daily_updates AS du
+    JOIN 
+        project AS p
+    ON 
+        du.project_id = p.project_id
+    WHERE 
+        du.employee_id = ?
+        AND du.date BETWEEN ? AND ?
+");
+    $sqlCurrentMonth->bind_param("sss", $emp_id, $currentMonthStart, $currentMonthEnd);
+    $sqlCurrentMonth->execute();
+    $resultCurrentMonth = $sqlCurrentMonth->get_result();
+    $currentMonthTotals = $resultCurrentMonth->fetch_assoc();
+
+    $totalMinutes = $currentMonthTotals['total_minute'];
+    $additionalHours = intdiv($totalMinutes, 60); // Hours derived from minutes
+    $remainingMinutes = $totalMinutes % 60; // Remaining minutes after accounting for hours
+
+    // Add additional hours to the total hours
+    $totalHours = $currentMonthTotals['total_hour'] + $additionalHours;
+
+    // Format the result
+    $formattedHours = $totalHours;
+    $formattedMinutes = str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT); // Ensure minutes are two digits
+
+    // Display the result in HH:MM format
+    $formattedTime = $formattedHours . ' : ' . $formattedMinutes;
 }
 
 
+
+
+// var_dump($project[0]['total_hour']);
+
+// var_dump($formattedTime);
 include("sidebar.php");
 // Your database queries and processing code here
 
@@ -149,13 +240,13 @@ if (isset($_POST['delete'])) {
     // var_dump($dele);
     if ($result) {
         // Deletion successful, redirect or show success message
-        header("Location: dashboard.php");         
+        header("Location: dashboard.php");
         exit();
     } else {
-        // Deletion failed, handle error
+        // Deletion failed, ;handle error
         echo "Error deleting vehicle.";
-    }                                                           
- }
+    }
+}
 
 $profile = $conn->query("SELECT * from employees where employee_id = $emp_id")->fetch_all(MYSQLI_ASSOC);
 
@@ -166,7 +257,7 @@ $profile = $conn->query("SELECT * from employees where employee_id = $emp_id")->
 // Assuming $project is an array of records
 $groupedByDate = [];
 $totalsByDate = [];
-
+// var_dump($project);
 foreach ($project as $p) {
     $date = htmlspecialchars($p['date']);
     $hour = isset($p['hour']) ? (int)$p['hour'] : 0;
@@ -179,7 +270,7 @@ foreach ($project as $p) {
     $groupedByDate[$date][] = $p;
 
     // Add to totals
-    $totalsByDate[$date]['hours'] += $hour; 
+    $totalsByDate[$date]['hours'] += $hour;
     $totalsByDate[$date]['minutes'] += $minute;
 }
 
@@ -195,7 +286,7 @@ foreach ($totalsByDate as $date => &$total) {
 if (isset($_SESSION['name'])) {
     // Split the full name into parts
     $nameParts = explode(' ', $profile[0]['name']);
-    
+
     // Initialize variables for initials
     $firstInitial = '';
     $lastInitial = '';
@@ -209,7 +300,44 @@ if (isset($_SESSION['name'])) {
     }
 
     // Output the initials
-} 
+}
+?>
+<?php
+// Get total hours and minutes from the project array
+$total_hours = $project[0]['total_hour'];
+$total_minutes = $project[0]['total_minute'];
+
+// Convert total minutes to hours and minutes
+$additional_hours = intdiv($total_minutes, 60); // Additional hours from minutes
+$remaining_minutes = $total_minutes % 60; // Remaining minutes after converting to hours
+
+// Calculate the final total hours and minutes
+$final_hours = $total_hours + $additional_hours;
+$final_minutes = $remaining_minutes;
+
+
+$eid = $_GET['id'];
+// var_dump($eid);
+$select_project_id = $conn->query("SELECT project_id from project_assign where employee_id = $eid ")->fetch_all(MYSQLI_ASSOC);
+// print_r('<pre>');
+// var_dump($select_project_id);
+
+$allIds = [];
+foreach ($select_project_id as $pro) {
+    $allIds[] = $pro['project_id'];
+}
+
+
+if (count($allIds) > 0) {
+    $idsString = implode(',', $allIds);
+    $formattedIds = "($idsString)";
+    $selected_project = $conn->query("SELECT * FROM project where project_id in $formattedIds")->fetch_all(MYSQLI_ASSOC);
+} else {
+    $selected_project = [];
+}
+//   print_r('<pre>');
+//  var_dump($selected_project);
+$total_count = count($selected_project);
 ?>
 
 <!DOCTYPE html>
@@ -222,15 +350,90 @@ if (isset($_SESSION['name'])) {
     <link rel="stylesheet" href="dashboard.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
-</head>
+        
+
+<style>
+ body {
+    font-family: 'Arial', sans-serif;
+}
+
+.hours-container {
+    display: flex;
+    gap: 50px; /* Adds space between the boxes */
+    padding: 20px;
+}
+
+.hours-box {
+    text-align: center;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hours-box h2 {
+    font-size: 28px; /* Match the size in the photo */
+    margin: 0;
+    font-weight: bold;
+}
+
+.hours-box span{
+    font-size: 16px; /* Smaller text for the label */
+    color: gray;
+    margin-block: 6px;
+}
+.modal-body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+</style>
+    </head>
 
 <body>
-
     <div class="main-content">
-        <div class="content">
+        <div class="content" style="margin-top:25px;">
             <!-- Your main content goes here -->
 
             <div class="space">
+
+                    <div class="spacebetween">
+
+                        <div class="xyz">
+                            <div class="firstlast">
+                                <b> <?php echo htmlspecialchars($firstInitial . $lastInitial); ?></b>
+                            </div>
+                            <div class="usersss">
+
+                                <b class="atoz"> <?php echo $profile[0]['name']; ?> </b>
+
+
+                                <b class="atos"><?php echo $profile[0]['position']; ?></b>
+                            </div>
+                        </div>
+
+                        <div class="emails">
+                           
+                            <b class="ay"><div style="display: flex; justify-content: end; width:100%;">
+    <svg xmlns="http://www.w3.org/2000/svg" height="25px"
+         viewBox="0 -960 960 960" width="25px" fill="black">
+        <path
+            d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
+    </svg>
+</div>
+ <?php echo $profile[0]['email']; ?></b>
+                        </div>
+
+                    </div>
+
+            </div>
+            <hr>
+
+
+            <!-- <div class="space">
 
                 <div class="userdetails-box d-flex">
                     <div class="xyz">
@@ -245,13 +448,18 @@ if (isset($_SESSION['name'])) {
                             <b class="aaaa"><?php echo $profile[0]['position']; ?></b>
                         </div>
                     </div>
-                
+
                     <div class="emails">
-                        <b class="aaaa"><svg xmlns="http://www.w3.org/2000/svg" height="50px" viewBox="0 -960 960 960" width="50px" fill="white"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"/></svg> <?php echo $profile[0]['email']; ?></b>
+                        <b class="aaaa"><svg xmlns="http://www.w3.org/2000/svg" height="50px" viewBox="0 -960 960 960"
+                                width="50px" fill="white">
+                                <path
+                                    d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
+                            </svg> <?php echo $profile[0]['email']; ?></b>
                     </div>
 
                 </div>
 
+            </div> -->
 
 
 
@@ -259,8 +467,126 @@ if (isset($_SESSION['name'])) {
 
 
 
-            </div>
+
+
+
+
+
+
+
+             <!-- <div class="container">
+    <div class="card border-primary mb-3" style="max-width: 15rem; height:fit-content;">
+        <div class="card-header">Weekly Total Hours</div>
+        <div class="card-body text-primary">
+            <h5 class="card-title">
+                <?php echo $final_hours; ?> : <?php echo $final_minutes; ?> hr
+            </h5>
+        </div>
+    </div>
+
+    <div class="card border-primary mb-3" style="max-width: 15rem; height:fit-content;">
+        <div class="card-header">Monthly Total Hours</div>
+        <div class="card-body text-primary">
+            <h5 class="card-title">
+                <?php echo $formattedTime; ?> hr
+            </h5>
+        </div>
+    </div>
+</div>  -->
+
+
+<div class="hours-container">
+    <div data-bs-toggle="modal" data-bs-target="#exampleModal" class="hours-box">
+        <h2><?php echo $total_count; ?></h2>
+        <span>Total Projects  &nbsp;<a class=" btn-primary btn-sm" style="cursor: pointer;">View</a></span>
+    </div>
+    <div class="v-hr"></div>
+    <div class="hours-box">
+        <h2><?php echo $final_hours; ?> : <?php echo $final_minutes; ?> hrs</h2>
+        <span>Weekly Total Hours</span>
+    </div>
+    <div class="v-hr"></div>
+    <div class="hours-box">
+        <h2><?php echo $formattedTime; ?> hrs</h2>
+        <span>Monthly Total Hours</span>
+    </div>
+</div>
+
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Total Project</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <?php if (!empty($selected_project)): ?>
+          <ul class="list-group">
+            <?php foreach ($selected_project as $project): ?>
+              <li class="list-group-item project-item">
+                <i class="fas fa-project-diagram me-2"></i>
+                <?php echo htmlspecialchars($project['project_name']); ?>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        <?php else: ?>
+          <div class="text-center">
+            <p>No projects available</p>
+          </div>
+        <?php endif; ?>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .project-item {
+    border: none; /* Remove the side borders */
+    width: 100%; /* Adjust width as needed */
+    font-size: 1.2rem; /* Increase font size */
+  }
+</style>
+
+
+
+
+
+
+<hr>
+
+
+
+            <label for="project">Select a Project:</label>
+            <select name="project" id="project">
+                <?php
+                // Assuming $selected_project is fetched and available
+                if (!empty($selected_project)) {
+                    foreach ($selected_project as $project) {
+                        echo '<option value="' . htmlspecialchars($project['project_id']) . '">'
+                            . htmlspecialchars($project['project_name']) . '</option>';
+                    }
+                } else {
+                    echo '<option value="">No projects available</option>';
+                }
+                ?>
+            </select>
+
+
+
+
+
+
+
+
             <div class="view">
+
                 <button id="toggleButton" class="btn btn-success" onclick="toggleVisibility()"> <svg
                         xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                         fill="white">
@@ -269,19 +595,27 @@ if (isset($_SESSION['name'])) {
                     </svg><b>View</b></button>
             </div>
             <div class="startenddate" id="start-and-end-date">
-                <form action="view_emp.php" method="post">
+                <form method="post">
                     <label for="start_date"><b>Start Date : </b></label>
                     <input type="date" id="start_date" name="start_date"
-                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>" required class="date-input">
+                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>" required
+                        class="date-input">
 
                     <label for="end_date"><b>End Date : </b></label>
                     <input type="date" id="end_date" name="end_date"
-                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>" required class="date-input">
-                    <input type="hidden" name='emp_id'
-                        value='<?php if(isset($_GET['id'])){echo $_GET['id'];}else{echo $_POST['emp_id'];}?>' />
+                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>" required
+                        class="date-input">
+                    <input type="hidden" name='emp_id' value='<?php if (isset($_GET['id'])) {
+                                                                    echo $_GET['id'];
+                                                                } else {
+                                                                    echo $_POST['emp_id'];
+                                                                } ?>' />
 
-                    <input type="hidden" name='name'
-                        value='<?php if(isset($_GET['name'])){echo $_GET['name'];}else{echo $_POST['name'];}?>' />
+                    <input type="hidden" name='name' value='<?php if (isset($_GET['name'])) {
+                                                                echo $_GET['name'];
+                                                            } else {
+                                                                echo $_POST['name'];
+                                                            } ?>' />
 
                     <input type="submit" name='date_view' value="Filter" class="filter-button">
                 </form>
@@ -304,6 +638,7 @@ if (isset($_SESSION['name'])) {
                         </tr>
                     </thead>
                     <tbody>
+
                         <?php foreach ($groupedByDate as $date => $records) { ?>
                         <!-- Date Header Row -->
                         <tr class="date-header">
@@ -372,8 +707,9 @@ if (isset($_SESSION['name'])) {
                                                                 <option value="<?php echo $p['project_id']; ?>" disabled
                                                                     selected>Select project</option>
                                                                 <?php foreach ($projects as $s): ?>
-                                                                <option
-                                                                    <?php if($s['project_id']==$p['project_id']){echo 'selected';} ?>
+                                                                <option <?php if ($s['project_id'] == $p['project_id']) {
+                                                                                        echo 'selected';
+                                                                                    } ?>
                                                                     value="<?= $s['project_id'] ?>">
                                                                     <?= $s['project_name'] ?></option>
                                                                 <?php endforeach; ?>
@@ -680,6 +1016,7 @@ if (isset($_SESSION['name'])) {
             </div>
         </div>
     </div>
+    <div id="chart"></div>
     <!-- Include modal form -->
     <!-- Your modal code here -->
     <script>
@@ -810,7 +1147,58 @@ if (isset($_SESSION['name'])) {
     document.getElementById('input-container').addEventListener('click', handleDeleteClick);
     document.getElementById('add-inputss-btn').addEventListener('click', addTaskTimeFields);
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+    var colors = ["black"]
+    var options = {
+        series: [{
+            data: [21, 22, 10, 28, 16, 21, 13, 30]
+        }],
+        chart: {
+            height: 350,
+            type: 'bar',
+            events: {
+                click: function(chart, w, e) {
+                    // console.log(chart, w, e)
+                }
+            }
+        },
+        colors: colors,
+        plotOptions: {
+            bar: {
+                columnWidth: '45%',
+                distributed: true,
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        legend: {
+            show: false
+        },
+        xaxis: {
+            categories: [
+                ['John', 'Doe'],
+                ['Joe', 'Smith'],
+                ['Jake', 'Williams'],
+                'Amber',
+                ['Peter', 'Brown'],
+                ['Mary', 'Evans'],
+                ['David', 'Wilson'],
+                ['Lily', 'Roberts'],
+            ],
+            labels: {
+                style: {
+                    colors: colors,
+                    fontSize: '12px'
+                }
+            }
+        }
+    };
 
+    var chart = new ApexCharts(document.querySelector("#chart"), options);
+    // chart.render();
+    </script>
 </body>
 
 </html>

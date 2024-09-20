@@ -19,7 +19,7 @@ if(isset($_POST['login'])){
         $_SESSION['position'] = $user[0][3];
         $_SESSION['role'] = $user[0][4];
         
-        header("Location: dashboard.php");
+        header("Location: home.php");
         exit();
     } else {
         // Incorrect password

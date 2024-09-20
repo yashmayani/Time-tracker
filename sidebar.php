@@ -81,33 +81,50 @@ select {
     <div class="item-wrapper">
         <img class="login-logo" src="./site_img/podev logo.png" width='200px' alt="Screenshot"
             style="margin-bottom:52px;">
-            <?php if ($_SESSION['role']==1) {?>
+       
             <a href="home.php" class="sidebar-a <?php if ($current_page == 'home.php') echo 'active'; ?>">
-            <div class="sidebar-item <?php if ($current_page == 'home.php') echo 'active'; ?>">
-              Home
-            </div>
-        </a>
-        <?php }?>
+    <div class="sidebar-item <?php if ($current_page == 'home.php') echo 'active'; ?>">
+        <img src="./logo/master-plan 1.png" alt="Home" class="sidebar-img <?php if ($current_page == 'home.php') echo 'active'; ?>">
+        Home
+    </div>
+</a>
+
+    
         <a href="dashboard.php" class="sidebar-a <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
             <div class="sidebar-item <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
+            <img src="./logo/arcticons_tv-browser-updateplugin.png" alt="Home" class="sidebar-img <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
+       
                 Update
             </div>
         </a>
-        <a href="addproject.php" class="sidebar-a <?php if ($current_page == 'addproject.php'||$current_page == 'view_project.php' ||$current_page == 'view_complete_project.php' ) echo 'active'; ?>">
-            <div class="sidebar-item <?php if ($current_page == 'addproject.php' ||$current_page == 'view_project.php'  ||$current_page == 'view_complete_project.php') echo 'active'; ?>">
-                Project
-            </div>
-        </a>
+        <a href="addproject.php" class="sidebar-a <?php if ($current_page == 'addproject.php' || $current_page == 'view_project.php' || $current_page == 'view_complete_project.php') echo 'active'; ?>">
+    <div class="sidebar-item <?php if ($current_page == 'addproject.php' || $current_page == 'view_project.php' || $current_page == 'view_complete_project.php') echo 'active'; ?>">
+        <img src="./logo/master-plan 1.png" alt="Projects" class="sidebar-img">
+        Projects
+    </div>
+</a>
+
         <?php if ($_SESSION['role']==1) {?>
         <a href="employee.php" class="sidebar-a <?php if ($current_page == 'employee.php'||$current_page == 'view_emp.php') echo 'active'; ?>">
             <div class="sidebar-item <?php if ($current_page == 'employee.php'||$current_page == 'view_emp.php') echo 'active'; ?>">
+            <img src="./logo/master-plan 1.png" alt="Home" class="sidebar-img <?php if ($current_page == 'employee.php'||$current_page == 'view_emp.php') echo 'active'; ?>">
+
                 Employee
             </div>
         </a>
         <?php }?> 
         <a href="leaves.php" class="sidebar-a <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
             <div class="sidebar-item <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
+            <img src="./logo/master-plan 1.png" alt="Home" class="sidebar-img <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
+
                Leave
+            </div>
+        </a>
+        <a href="policy.php" class="sidebar-a <?php if ($current_page == 'policy.php') echo 'active'; ?>">
+            <div class="sidebar-item <?php if ($current_page == 'policy.php') echo 'active'; ?>">
+            <img src="./logo/master-plan 1.png" alt="Home" class="sidebar-img <?php if ($current_page == 'policy.php') echo 'active'; ?>">
+
+               Company Policy
             </div>
         </a>
     </div>

@@ -39,7 +39,7 @@ $result = $sql->get_result();
 if ($result->num_rows > 0) {
     echo "<h2>Updates for: " . htmlspecialchars($date_from_form) . "</h2>";
     echo "<div id='main-table'>";
-    echo  "<table id='vehicleTable' class='table table-striped'>
+    echo  "<table id='vehicleTable' class='table '>
             <tr>
                  <th>UPDATE</th>
                         <th>TIME</th>
