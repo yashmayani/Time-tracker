@@ -49,10 +49,38 @@ if (isset($_POST['editupdate'])) {
 include("navbar.php");
 
 
-if (isset($_POST['date_view'])) {
-    $date_from_form = $_POST['date'];
+// if (isset($_POST['date_view'])) {
+//     $date_from_form = $_POST['date'];
 
-    // Fetch records for the given date
+//     // Fetch records for the given date
+//     $sql =  $conn->prepare("SELECT 
+//     du.update_id,
+//     du.project_id,
+//     du.task,
+//     du.date,
+//     du.hour,
+//     du.minute,
+//     du.commit_id,
+//     p.project_name
+// FROM 
+//     daily_updates AS du
+// JOIN 
+//     project AS p
+// ON 
+//     du.project_id = p.project_id
+//     WHERE 
+//         du.employee_id = ? AND date = ?");
+//     $sql->bind_param("ss", $_SESSION['employee_id'], $date_from_form);
+//     $sql->execute();
+//     $result = $sql->get_result();
+//     $project = $result->fetch_all(MYSQLI_ASSOC);
+// }
+
+if (isset($_POST['date_view'])) {
+    $emp_id = $_SESSION['employee_id'];
+    $startDate = isset($_POST['start_date']) ? $_POST['start_date'] : '';
+    $endDate = isset($_POST['end_date']) ? $_POST['end_date'] : '';
+
     $sql =  $conn->prepare("SELECT 
     du.update_id,
     du.project_id,
@@ -69,11 +97,24 @@ JOIN
 ON 
     du.project_id = p.project_id
     WHERE 
-        du.employee_id = ? AND date = ?");
-    $sql->bind_param("ss", $_SESSION['employee_id'], $date_from_form);
+        du.employee_id = ? AND (date BETWEEN ? AND ?)");
+    $sql->bind_param("sss", $emp_id, $startDate, $endDate);
     $sql->execute();
     $result = $sql->get_result();
     $project = $result->fetch_all(MYSQLI_ASSOC);
+
+
+//     header('Content-Type: text/csv');
+// header('Content-Disposition: attachment; filename="projects.csv"');
+// $output = fopen('php://output', 'w');
+// if (!empty($project)) {
+//     fputcsv($output, array_keys($project[0]));
+// }
+// foreach ($project as $row) {
+//     fputcsv($output, $row);
+// }
+// fclose($output);
+// exit();
 }
 
 
@@ -174,20 +215,53 @@ if (count($allIds) > 0) {
             <!-- Your main content goes here -->
 
             <div class="space">
-                <b class="a">Daily Update</b>
+                <b class="a">Work diary</b>
                 <a href="#" class="btn added btn-sm" data-bs-toggle="modal" data-bs-target="#createMeetingModal">Add
                     Update</a>
             </div>
-            <div class="qwe">
+            <!-- <div class="qwe"> -->
 
 
-                <form action="dashboard.php" method="post">
+            <!-- <form action="dashboard.php" method="post">
                     <input type="date" id="date"
                         value="<?php echo isset($_POST['date']) ? htmlspecialchars($_POST['date']) : ''; ?>" name="date"
                         required class="date-input">
                     <input type="submit" name='date_view' value="filter" class="filter-button">
+                </form> -->
+            <!-- <input type="date" name="date" data-date="" class="addid" required> -->
+
+            <!-- </div> -->
+
+
+
+            <div class="startenddate" id="start-and-end-date">
+                <form method="post">
+                    <label for="start_date"><b>Start Date : </b></label>
+                    <input type="date" id="start_date" name="start_date"
+                        value="<?php echo isset($_POST['start_date']) ? ($_POST['start_date']) : ''; ?>" required
+                        class="date-input">
+
+                    <label for="end_date"><b>End Date : </b></label>
+                    <input type="date" id="end_date" name="end_date"
+                        value="<?php echo isset($_POST['end_date']) ? ($_POST['end_date']) : ''; ?>" required
+                        class="date-input">
+                    <input type="hidden" name='emp_id' value='<?php if (isset($_GET['id'])) {
+                                                                    echo $_GET['id'];
+                                                                } else {
+                                                                    echo $_POST['emp_id'];
+                                                                } ?>' />
+
+                    <input type="hidden" name='name' value='<?php if (isset($_GET['name'])) {
+                                                                echo $_GET['name'];
+                                                            } else {
+                                                                echo $_POST['name'];
+                                                            } ?>' />
+
+                    <input type="submit" name='date_view' value="Filter" class="filter-button">
                 </form>
-                <!-- <input type="date" name="date" data-date="" class="addid" required> -->
+                <button style="background-color: #b1becc;color: black;border: none;border-radius: 5px; cursor: pointer;width: auto;padding:4px; height: 42px;display: flex;justify-content: center;align-items: center; margin-block:auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg>Export
+                </button>
 
             </div>
 
@@ -197,165 +271,170 @@ if (count($allIds) > 0) {
             <table id="vehicleTable" class="table ">
                 <thead>
                     <tr>
-
-                        <th>UPDATE</th>
-                        <th>TIME</th>
-                        <th>COMMIT ID</th>
+                        <!-- <th>DATE</th> -->
                         <th>PROJECT</th>
+                        <th>UPDATE</th>
+                        <th>Working Hour</th>
+
+                        <th>COMMIT ID</th>
+
                         <th>ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($groupedByDate as $date => $records) { ?>
-                        <!-- Date Header Row -->
-                        <tr class="date-header">
-                        <tr>
-                            <td colspan="6" style="color: #00215E;">
-                                <strong>Date: </strong><?php echo $date; ?>&nbsp; &nbsp; <strong>Total hours:</strong>
-                                <?php echo sprintf('%02d:%02d', $totalsByDate[$date]['hours'], $totalsByDate[$date]['minutes']); ?>
-                            </td>
-                        </tr>
+                    <!-- Date Header Row -->
+                    <tr class="date-header">
+                    <tr>
+                        <td colspan="6" style="color: #00215E;">
+                            <strong>Date: </strong><?php echo $date; ?>&nbsp; &nbsp; <strong>Total hours:</strong>
+                            <?php echo sprintf('%02d:%02d', $totalsByDate[$date]['hours'], $totalsByDate[$date]['minutes']); ?>
+                        </td>
+                    </tr>
 
 
 
 
-                        </tr>
-                        <!-- Data Rows for the Current Date -->
-                        <?php foreach ($records as $p) { ?>
-                            <tr>
-
-                                <td><?php echo nl2br(($p['task'])); ?></td>
-                                <td><?php echo htmlspecialchars($p['hour']) . ':' . htmlspecialchars($p['minute']); ?></td>
-                                <td><?php echo htmlspecialchars($p['commit_id']); ?></td>
-                                <td><?php echo htmlspecialchars($p['project_name']); ?></td>
-
-
+                    </tr>
+                    <!-- Data Rows for the Current Date -->
+                    <?php foreach ($records as $p) { ?>
+                    <tr>
+                        <!-- <td><?php echo htmlspecialchars($p['date']); ?></td> -->
+                        <td><?php echo htmlspecialchars($p['project_name']); ?></td>
+                        <td><?php echo nl2br(($p['task'])); ?></td>
+                        <td><?php echo htmlspecialchars($p['hour']) . ':' . htmlspecialchars($p['minute']); ?></td>
+                        <td><?php echo htmlspecialchars($p['commit_id']); ?></td>
 
 
 
 
-                                <td>
-                                    <span class="spaces">
-                                        <a href="#" onclick="func(e)" class="btn btn-outline-success " data-bs-toggle="modal"
-                                            data-bs-target="#editMeetingModal<?php echo $p['update_id']; ?>"><svg
-                                                xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                                width="24px" class="icon">
-                                                <path
-                                                    d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
-                                            </svg><b>Edit</b></a>
-                                        <button type="button" class="btn btn-outline-danger delete-btn"
-                                            data-id="<?php echo $p['update_id']; ?>" data-bs-toggle="modal"
-                                            data-bs-target="#deleteConfirmationModal<?php echo $p['update_id']; ?>">
-                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                                width="24px" class="icon">
-                                                <path
-                                                    d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-                                            </svg>
-                                            Delete
-                                        </button>
 
 
-                                        <div class="modal fade" id="deleteConfirmationModal<?php echo $p['update_id']; ?>"
-                                            tabindex="-1" aria-labelledby="editMeetingModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content delete-modal2">
-                                                    <div class="modal ">
+
+                        <td>
+                            <span class="spaces">
+                                <a href="#" onclick="func(e)" class="btn btn-outline-success " data-bs-toggle="modal"
+                                    data-bs-target="#editMeetingModal<?php echo $p['update_id']; ?>"><svg
+                                        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                        width="24px" class="icon">
+                                        <path
+                                            d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+                                    </svg><b>Edit</b></a>
+                                <button type="button" class="btn btn-outline-danger delete-btn"
+                                    data-id="<?php echo $p['update_id']; ?>" data-bs-toggle="modal"
+                                    data-bs-target="#deleteConfirmationModal<?php echo $p['update_id']; ?>">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                        width="24px" class="icon">
+                                        <path
+                                            d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                                    </svg>
+                                    Delete
+                                </button>
 
 
+                                <div class="modal fade" id="deleteConfirmationModal<?php echo $p['update_id']; ?>"
+                                    tabindex="-1" aria-labelledby="editMeetingModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content delete-modal2">
+                                            <div class="modal ">
+
+
+                                            </div>
+                                            <div class="modal-body delete-modal">
+
+                                                <center>
+                                                    <div class="yass">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" height="30px"
+                                                            viewBox="0 -960 960 960" width="30px" fill="red"
+                                                            style="background-color:#ebecef; border-radius: 10px !important;  width: 30px; height: 30px;">
+                                                            <path
+                                                                d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                                                        </svg>
                                                     </div>
-                                                    <div class="modal-body delete-modal">
-
-                                                        <center>
-                                                            <div class="yass">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" height="30px"
-                                                                    viewBox="0 -960 960 960" width="30px" fill="red"
-                                                                    style="background-color:#ebecef; border-radius: 10px !important;  width: 30px; height: 30px;">
-                                                                    <path
-                                                                        d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-                                                                </svg>
-                                                            </div>
-                                                            <center>
-                                                                <p style=color:red;><b>Delete</b></p>
-                                                                <p>Are you want to sure delete update?</p>
+                                                    <center>
+                                                        <p style=color:red;><b>Delete</b></p>
+                                                        <p>Are you want to sure delete update?</p>
 
 
-                                                    </div>
-                                                    <div class="yash">
-                                                        <form method="POST" action="deleteupdate.php"
-                                                            style="display: flex; gap: 15px;">
+                                            </div>
+                                            <div class="yash">
+                                                <form method="POST" action="deleteupdate.php"
+                                                    style="display: flex; gap: 15px;">
 
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Cancel</button>
-                                                            <input type="hidden" name="delete_project_id"
-                                                                value="<?php echo $p['update_id']; ?>">
-                                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Cancel</button>
+                                                    <input type="hidden" name="delete_project_id"
+                                                        value="<?php echo $p['update_id']; ?>">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
 
 
 
 
-                                        <div class="modal fade" id="editMeetingModal<?php echo $p['update_id']; ?>"
-                                            tabindex="-1" aria-labelledby="createMeetingModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <span></span>
-                                                        <h3 class="modal-title" id="createMeetingModalLabel"><b>Edit Daily
-                                                                Update</b>
-                                                        </h3>
-                                                        <svg data-bs-dismiss="modal" aria-label="Close"
-                                                            xmlns="http://www.w3.org/2000/svg" height="24px"
-                                                            viewBox="0 -960 960 960" width="24px" fill="#5f6368"
-                                                            style="cursor:pointer;">
-                                                            <path
-                                                                d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
-                                                        </svg>
+                                <div class="modal fade" id="editMeetingModal<?php echo $p['update_id']; ?>"
+                                    tabindex="-1" aria-labelledby="createMeetingModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <span></span>
+                                                <h3 class="modal-title" id="createMeetingModalLabel"><b>Edit Daily
+                                                        Update</b>
+                                                </h3>
+                                                <svg data-bs-dismiss="modal" aria-label="Close"
+                                                    xmlns="http://www.w3.org/2000/svg" height="24px"
+                                                    viewBox="0 -960 960 960" width="24px" fill="#5f6368"
+                                                    style="cursor:pointer;">
+                                                    <path
+                                                        d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                                                </svg>
 
 
-                                                    </div>
-                                                    <form class="modal-form" method="POST" action="dashboard.php">
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="md-6">
-                                                                    <div class="mb-3">
-                                                                        <label for="date" class="form-label">Select Date</label>
-                                                                        <input type="date" name="date" class="form-control"
-                                                                            value="<?php echo $p['date']; ?>" required>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="md-6">
-                                                                    <div class="mb-3">
-                                                                        <label for="project" class="form-label">Select
-                                                                            Project</label>
-                                                                        <select name="projects" id="projects"
-                                                                            class="form-select" required>
-                                                                            <option value="" disabled selected>Select project
-                                                                            </option>
+                                            </div>
+                                            <form class="modal-form" method="POST" action="dashboard.php">
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="md-6">
+                                                            <div class="mb-3">
+                                                                <label for="date" class="form-label">Select Date</label>
+                                                                <input type="date" name="date" class="form-control"
+                                                                    value="<?php echo $p['date']; ?>" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="md-6">
+                                                            <div class="mb-3">
+                                                                <label for="project" class="form-label">Select
+                                                                    Project</label>
+                                                                <select name="projects" id="projects"
+                                                                    class="form-select" required>
+                                                                    <option value="" disabled selected>Select project
+                                                                    </option>
 
-                                                                            <?php foreach ($selected_project as $a): ?>
-                                                                                <?php if ($_SESSION['role'] == 0  && $a['status'] == 0) { ?>
-                                                                                    <option <?php if ($a['project_id'] == $p['project_id']) {
+                                                                    <?php foreach ($selected_project as $a): ?>
+                                                                    <?php if ($_SESSION['role'] == 0  && $a['status'] == 0) { ?>
+                                                                    <option <?php if ($a['project_id'] == $p['project_id']) {
                                                                                                 echo 'selected';
-                                                                                            } ?>  value="<?= $a['project_id'] ?>">
-                                                                                        <?= $a['project_name'] ?></option>
-                                                                                <?php } ?>
-                                                                            <?php endforeach; ?>
+                                                                                            } ?>
+                                                                        value="<?= $a['project_id'] ?>">
+                                                                        <?= $a['project_name'] ?></option>
+                                                                    <?php } ?>
+                                                                    <?php endforeach; ?>
 
-                                                                            <?php foreach ($projects as $a): ?>
-                                                                                <?php if ($_SESSION['role'] == 1 && $a['status'] == 0) { ?>
-                                                                                    <option <?php if ($a['project_id'] == $p['project_id']) {
+                                                                    <?php foreach ($projects as $a): ?>
+                                                                    <?php if ($_SESSION['role'] == 1 && $a['status'] == 0) { ?>
+                                                                    <option <?php if ($a['project_id'] == $p['project_id']) {
                                                                                                 echo 'selected';
-                                                                                            } ?>  value="<?= $a['project_id'] ?>">
-                                                                                        <?= $a['project_name'] ?></option>
-                                                                                <?php } ?>
-                                                                            <?php endforeach; ?>
+                                                                                            } ?>
+                                                                        value="<?= $a['project_id'] ?>">
+                                                                        <?= $a['project_name'] ?></option>
+                                                                    <?php } ?>
+                                                                    <?php endforeach; ?>
 
-                                                                        </select>
-                                                                        <!-- <select name="projects" id="projects"
+                                                                </select>
+                                                                <!-- <select name="projects" id="projects"
                                                                             class="form-select" required>
                                                                             <option value="<?php echo $p['project_id']; ?>"
                                                                                 disabled selected>Select project</option>
@@ -371,162 +450,162 @@ if (count($allIds) > 0) {
 
 
 
-                                                                    </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div id="input-container">
+                                                        <!-- Initial task-time pair -->
+                                                        <div class="row task-time-container">
+                                                            <div class="md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="task" class="form-label">Enter task
+                                                                        description</label>
+                                                                    <textarea name="task" class="form-control"
+                                                                        id="task-1"
+                                                                        required><?php echo htmlspecialchars($p['task']); ?></textarea>
                                                                 </div>
 
                                                             </div>
 
-                                                            <div id="input-container">
-                                                                <!-- Initial task-time pair -->
-                                                                <div class="row task-time-container">
-                                                                    <div class="md-6">
-                                                                        <div class="mb-3">
-                                                                            <label for="task" class="form-label">Enter task
-                                                                                description</label>
-                                                                            <textarea name="task" class="form-control"
-                                                                                id="task-1"
-                                                                                required><?php echo htmlspecialchars($p['task']); ?></textarea>
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                    <div class="my-row">
-                                                                        <div class="mb-3">
-                                                                            <label for="hours" class="form-label">Select
-                                                                                hours</label>
-                                                                            <select name="hours" class="form-select" id="time-1"
-                                                                                required>
-                                                                                <option value="" disabled selected>Select Time
-                                                                                    duration
-                                                                                </option>
-                                                                                <option value="0"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 0) ? 'selected' : ''; ?>>
-                                                                                    0</option>
-                                                                                <option value="1"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 1) ? 'selected' : ''; ?>>
-                                                                                    1</option>
-                                                                                <option value="2"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 2) ? 'selected' : ''; ?>>
-                                                                                    2</option>
-                                                                                <option value="3"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 3) ? 'selected' : ''; ?>>
-                                                                                    3</option>
-                                                                                <option value="4"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 4) ? 'selected' : ''; ?>>
-                                                                                    4</option>
-                                                                                <option value="5"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 5) ? 'selected' : ''; ?>>
-                                                                                    5</option>
-                                                                                <option value="6"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 6) ? 'selected' : ''; ?>>
-                                                                                    6</option>
-                                                                                <option value="7"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 7) ? 'selected' : ''; ?>>
-                                                                                    7</option>
-                                                                                <option value="8"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 8) ? 'selected' : ''; ?>>
-                                                                                    8</option>
-                                                                                <option value="9"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 9) ? 'selected' : ''; ?>>
-                                                                                    9</option>
-                                                                                <option value="10"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 10) ? 'selected' : ''; ?>>
-                                                                                    10</option>
-                                                                                <option value="11"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 11) ? 'selected' : ''; ?>>
-                                                                                    11</option>
-                                                                                <option value="12"
-                                                                                    <?php echo (isset($p['hour']) && $p['hour'] == 12) ? 'selected' : ''; ?>>
-                                                                                    12</option>
-                                                                            </select>
-                                                                        </div>
-
-                                                                        <div class="mb-3">
-                                                                            <label for="minutes" class="form-label">Select
-                                                                                minutes</label>
-                                                                            <select name="minutes" class="form-select"
-                                                                                id="time-1" required>
-                                                                                <option value="" disabled selected>Select Time
-                                                                                    duration
-                                                                                </option>
-                                                                                <option value="00"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '00') ? 'selected' : ''; ?>>
-                                                                                    00</option>
-                                                                                <option value="05"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '05') ? 'selected' : ''; ?>>
-                                                                                    05</option>
-                                                                                <option value="10"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '10') ? 'selected' : ''; ?>>
-                                                                                    10</option>
-                                                                                <option value="15"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '15') ? 'selected' : ''; ?>>
-                                                                                    15</option>
-                                                                                <option value="20"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '20') ? 'selected' : ''; ?>>
-                                                                                    20</option>
-                                                                                <option value="25"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '25') ? 'selected' : ''; ?>>
-                                                                                    25</option>
-                                                                                <option value="30"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '30') ? 'selected' : ''; ?>>
-                                                                                    30</option>
-                                                                                <option value="35"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '35') ? 'selected' : ''; ?>>
-                                                                                    35</option>
-                                                                                <option value="40"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '40') ? 'selected' : ''; ?>>
-                                                                                    40</option>
-                                                                                <option value="45"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '45') ? 'selected' : ''; ?>>
-                                                                                    45</option>
-                                                                                <option value="50"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '50') ? 'selected' : ''; ?>>
-                                                                                    50</option>
-                                                                                <option value="55"
-                                                                                    <?php echo (isset($p['minute']) && $p['minute'] == '55') ? 'selected' : ''; ?>>
-                                                                                    55</option>
-                                                                            </select>
-                                                                        </div>
-
-
-                                                                    </div>
-
-                                                                    <div class="md-6">
-                                                                        <div class="mb-3">
-                                                                            <label for="task" class="form-label">Enter task
-                                                                                commit
-                                                                                id</label>
-                                                                            <input type="text" name="commit_id"
-                                                                                class="form-control"
-                                                                                value="<?php echo $p['commit_id']; ?>"
-                                                                                id="task-1">
-                                                                        </div>
-                                                                    </div>
-
-
+                                                            <div class="my-row">
+                                                                <div class="mb-3">
+                                                                    <label for="hours" class="form-label">Select
+                                                                        hours</label>
+                                                                    <select name="hours" class="form-select" id="time-1"
+                                                                        required>
+                                                                        <option value="" disabled selected>Select Time
+                                                                            duration
+                                                                        </option>
+                                                                        <option value="0"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 0) ? 'selected' : ''; ?>>
+                                                                            0</option>
+                                                                        <option value="1"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 1) ? 'selected' : ''; ?>>
+                                                                            1</option>
+                                                                        <option value="2"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 2) ? 'selected' : ''; ?>>
+                                                                            2</option>
+                                                                        <option value="3"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 3) ? 'selected' : ''; ?>>
+                                                                            3</option>
+                                                                        <option value="4"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 4) ? 'selected' : ''; ?>>
+                                                                            4</option>
+                                                                        <option value="5"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 5) ? 'selected' : ''; ?>>
+                                                                            5</option>
+                                                                        <option value="6"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 6) ? 'selected' : ''; ?>>
+                                                                            6</option>
+                                                                        <option value="7"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 7) ? 'selected' : ''; ?>>
+                                                                            7</option>
+                                                                        <option value="8"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 8) ? 'selected' : ''; ?>>
+                                                                            8</option>
+                                                                        <option value="9"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 9) ? 'selected' : ''; ?>>
+                                                                            9</option>
+                                                                        <option value="10"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 10) ? 'selected' : ''; ?>>
+                                                                            10</option>
+                                                                        <option value="11"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 11) ? 'selected' : ''; ?>>
+                                                                            11</option>
+                                                                        <option value="12"
+                                                                            <?php echo (isset($p['hour']) && $p['hour'] == 12) ? 'selected' : ''; ?>>
+                                                                            12</option>
+                                                                    </select>
                                                                 </div>
-                                                                <input type="hidden" name="update_id"
-                                                                    value="<?php echo $p['update_id']; ?>">
-                                                                <div>
-                                                                    <button type="submit" name="editupdate"
-                                                                        class="btn it">Submit</button>
+
+                                                                <div class="mb-3">
+                                                                    <label for="minutes" class="form-label">Select
+                                                                        minutes</label>
+                                                                    <select name="minutes" class="form-select"
+                                                                        id="time-1" required>
+                                                                        <option value="" disabled selected>Select Time
+                                                                            duration
+                                                                        </option>
+                                                                        <option value="00"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '00') ? 'selected' : ''; ?>>
+                                                                            00</option>
+                                                                        <option value="05"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '05') ? 'selected' : ''; ?>>
+                                                                            05</option>
+                                                                        <option value="10"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '10') ? 'selected' : ''; ?>>
+                                                                            10</option>
+                                                                        <option value="15"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '15') ? 'selected' : ''; ?>>
+                                                                            15</option>
+                                                                        <option value="20"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '20') ? 'selected' : ''; ?>>
+                                                                            20</option>
+                                                                        <option value="25"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '25') ? 'selected' : ''; ?>>
+                                                                            25</option>
+                                                                        <option value="30"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '30') ? 'selected' : ''; ?>>
+                                                                            30</option>
+                                                                        <option value="35"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '35') ? 'selected' : ''; ?>>
+                                                                            35</option>
+                                                                        <option value="40"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '40') ? 'selected' : ''; ?>>
+                                                                            40</option>
+                                                                        <option value="45"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '45') ? 'selected' : ''; ?>>
+                                                                            45</option>
+                                                                        <option value="50"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '50') ? 'selected' : ''; ?>>
+                                                                            50</option>
+                                                                        <option value="55"
+                                                                            <?php echo (isset($p['minute']) && $p['minute'] == '55') ? 'selected' : ''; ?>>
+                                                                            55</option>
+                                                                    </select>
+                                                                </div>
+
+
+                                                            </div>
+
+                                                            <div class="md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="task" class="form-label">Enter task
+                                                                        commit
+                                                                        id</label>
+                                                                    <input type="text" name="commit_id"
+                                                                        class="form-control"
+                                                                        value="<?php echo $p['commit_id']; ?>"
+                                                                        id="task-1">
                                                                 </div>
                                                             </div>
-                                                    </form>
-                                                </div>
-                                            </div>
+
+
+                                                        </div>
+                                                        <input type="hidden" name="update_id"
+                                                            value="<?php echo $p['update_id']; ?>">
+                                                        <div>
+                                                            <button type="submit" name="editupdate"
+                                                                class="btn it">Submit</button>
+                                                        </div>
+                                                    </div>
+                                            </form>
                                         </div>
-                                        <!-- Includ Delete Confirmation Modal -->
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr class="total-row">
-                                <!-- <td colspan="6">
+                                    </div>
+                                </div>
+                                <!-- Includ Delete Confirmation Modal -->
+                            </span>
+                        </td>
+                    </tr>
+                    <tr class="total-row">
+                        <!-- <td colspan="6">
                     <strong>Total Hours for <?php echo $date; ?>:</strong>
                     <?php echo sprintf('%02d:%02d', $totalsByDate[$date]['hours'], $totalsByDate[$date]['minutes']); ?>
                 </td> -->
-                            </tr>
-                        <?php } ?>
+                    </tr>
+                    <?php } ?>
                     <?php } ?>
                 </tbody>
             </table>
@@ -568,6 +647,7 @@ if (count($allIds) > 0) {
 
 
                 </div>
+
                 <form class="modal-form" method="POST" action="addupdates2.php">
                     <div class="modal-body">
                         <div class="row">
@@ -578,6 +658,7 @@ if (count($allIds) > 0) {
                                         required>
                                 </div>
                             </div>
+
                             <div class="md-6">
                                 <div class="mb-3">
                                     <label for="project" class="form-label">Select Project</label>
@@ -585,15 +666,15 @@ if (count($allIds) > 0) {
                                         <option value="" disabled selected>Select project</option>
 
                                         <?php foreach ($selected_project as $p): ?>
-                                            <?php if ($_SESSION['role'] == 0  && $p['status'] == 0) { ?>
-                                                <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
-                                            <?php } ?>
+                                        <?php if ($_SESSION['role'] == 0  && $p['status'] == 0) { ?>
+                                        <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
+                                        <?php } ?>
                                         <?php endforeach; ?>
 
                                         <?php foreach ($projects as $p): ?>
-                                            <?php if ($_SESSION['role'] == 1 && $p['status'] == 0) { ?>
-                                                <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
-                                            <?php } ?>
+                                        <?php if ($_SESSION['role'] == 1 && $p['status'] == 0) { ?>
+                                        <option value="<?= $p['project_id'] ?>"><?= $p['project_name'] ?></option>
+                                        <?php } ?>
                                         <?php endforeach; ?>
 
                                     </select>
@@ -710,64 +791,90 @@ if (count($allIds) > 0) {
         integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        $(".addid").on("change", function() {
-            this.setAttribute(
-                "data-date",
-                this.value
-            )
-            console.log(this.value)
-        }).trigger("change")
+    $(".addid").on("change", function() {
+        this.setAttribute(
+            "data-date",
+            this.value
+        )
+        console.log(this.value)
+    }).trigger("change")
+    </script>
+    <script>
+    let is_open = <?php echo $filter ? 'true' : 'false'; ?>;
+    var myTaskDiv = document.getElementById('main-table');
+    var myTaskDiv2 = document.getElementById('start-and-end-date');
+
+    if (is_open) {
+        myTaskDiv.style.display = 'block';
+        myTaskDiv2.style.display = 'flex';
+    } else {
+        myTaskDiv.style.display = 'none';
+        myTaskDiv2.style.display = 'none';
+    }
+
+    function toggleVisibility() {
+        if (myTaskDiv.style.display === 'none') {
+            myTaskDiv.style.display = 'block';
+        } else {
+            myTaskDiv.style.display = 'none';
+        }
+
+        if (myTaskDiv2.style.display === 'none') {
+            myTaskDiv2.style.display = 'flex';
+        } else {
+            myTaskDiv2.style.display = 'none';
+        }
+    }
     </script>
 
-
     <script>
-        let taskCount = 1;
+    let taskCount = 1;
 
-        function addTaskTimeFields() {
-            taskCount++;
-            const container = document.getElementById('input-container');
-            const newTaskTimeContainer = document.createElement('div');
-            newTaskTimeContainer.className = 'row task-time-container';
+    function addTaskTimeFields() {
+        taskCount++;
+        const container = document.getElementById('input-container');
+        const newTaskTimeContainer = document.createElement('div');
+        newTaskTimeContainer.className = 'row task-time-container';
 
-            const taskDiv = document.createElement('div');
-            taskDiv.className = 'col-md-4 qw';
-            taskDiv.innerHTML = `
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'col-md-4 qw';
+        taskDiv.innerHTML = `
         <div class="mb-3">
             <label for="task-${taskCount}" class="form-label">Enter task description</label>
             <input type="text" name="task[]" class="form-control" id="task-${taskCount}" placeholder="Enter task" required>
         </div>
         `;
 
-            const hoursDiv = document.createElement('div');
-            hoursDiv.className = 'col-md-3 er';
-            hoursDiv.innerHTML = `
+        const hoursDiv = document.createElement('div');
+        hoursDiv.className = 'col-md-3 er';
+        hoursDiv.innerHTML = `
         <div class="mb-3 yashh">
             <label for="hours-${taskCount}" class="form-label">Enter hours</label>
             <input type="text" name="hours[]" class="form-control" id="hours-${taskCount}" placeholder="Enter hours" required>
         </div>
         `;
 
-            const minutesDiv = document.createElement('div');
-            minutesDiv.className = 'col-md-3 er';
-            minutesDiv.innerHTML = `
+        const minutesDiv = document.createElement('div');
+        minutesDiv.className = 'col-md-3 er';
+        minutesDiv.innerHTML = `
         <div class="mb-3">
             <label for="minutes-${taskCount}" class="form-label">Enter minutes</label>
             <input type="text" name="minutes[]" class="form-control" id="minutes-${taskCount}" placeholder="Enter minutes" required>
         </div>
         `;
 
-            const commentDiv = document.createElement('div');
-            commentDiv.className = 'col-md-4 yt';
-            commentDiv.innerHTML = `
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'col-md-4 yt';
+        commentDiv.innerHTML = `
         <div class="mb-3">
             <label for="comment-${taskCount}" class="form-label">Enter task commit id</label>
             <input type="text" name="commit_id[]" class="form-control" id="comment-${taskCount}" placeholder="Enter commit id" required>
         </div>
         `;
 
-            const deleteDiv = document.createElement('div');
-            deleteDiv.className = 'col-md-1 ty';
-            deleteDiv.innerHTML = `
+        const deleteDiv = document.createElement('div');
+        deleteDiv.className = 'col-md-1 ty';
+        deleteDiv.innerHTML = `
         <div class="mb-3">
             <button type="button" class="btn btn-danger delete-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="white" class="icon">
@@ -777,25 +884,25 @@ if (count($allIds) > 0) {
         </div>
         `;
 
-            newTaskTimeContainer.appendChild(taskDiv);
-            newTaskTimeContainer.appendChild(hoursDiv);
-            newTaskTimeContainer.appendChild(minutesDiv);
-            newTaskTimeContainer.appendChild(commentDiv);
-            newTaskTimeContainer.appendChild(deleteDiv);
+        newTaskTimeContainer.appendChild(taskDiv);
+        newTaskTimeContainer.appendChild(hoursDiv);
+        newTaskTimeContainer.appendChild(minutesDiv);
+        newTaskTimeContainer.appendChild(commentDiv);
+        newTaskTimeContainer.appendChild(deleteDiv);
 
-            container.appendChild(newTaskTimeContainer);
+        container.appendChild(newTaskTimeContainer);
+    }
+
+    function handleDeleteClick(event) {
+        if (event.target.closest('.delete-btn')) {
+            const button = event.target.closest('.delete-btn');
+            const container = button.closest('.task-time-container');
+            container.remove();
         }
+    }
 
-        function handleDeleteClick(event) {
-            if (event.target.closest('.delete-btn')) {
-                const button = event.target.closest('.delete-btn');
-                const container = button.closest('.task-time-container');
-                container.remove();
-            }
-        }
-
-        document.getElementById('input-container').addEventListener('click', handleDeleteClick);
-        document.getElementById('add-inputss-btn').addEventListener('click', addTaskTimeFields);
+    document.getElementById('input-container').addEventListener('click', handleDeleteClick);
+    document.getElementById('add-inputss-btn').addEventListener('click', addTaskTimeFields);
     </script>
 
 </body>

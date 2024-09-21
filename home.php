@@ -19,10 +19,15 @@ if (isset($_POST['updatenews'])) {
     $id = $_POST['news_id'];
 
 
-    $updatenews = $conn->query("UPDATE prodev_news SET title ='$title',content = '$content' WHERE news_id  ='$id'");
+    $updatenews = $conn->prepare("UPDATE prodev_news SET title = ? , content = ? WHERE news_id  = ? ");
     var_dump($updatenews);
-
-    if ($updatenews) {
+    if ($updatenews === false) {
+        die("Error preparing the statement: " . $conn->error);
+    }
+    
+    // Bind parameters
+    $updatenews->bind_param('ssi', $title, $content, $id);
+    if ($updatenews->execute()) {
         header("Refresh:0");
         ob_end_flush(); // Flush and turn off output buffering
         exit;
@@ -173,6 +178,14 @@ function timeAgo($dateString)
             justify-content: center;
             align-items: center;
         }
+
+        .news-imagess {
+            border-radius: 15px;
+            object-fit: contain;
+            width: 100%;
+            height: 300px;
+            background: #f6f6f6;
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
 
@@ -183,7 +196,7 @@ function timeAgo($dateString)
 
         <div class="contents">
             <div class="space">
-                <b class="a">Prodev Updates</b>
+                <b class="a">Prodev Update</b>
                 <?php if ($_SESSION['role'] == 1) { ?>
                     <a href="#" class="btn added btn-sm" data-bs-toggle="modal" data-bs-target="#createProdevnewsModal">Add
                         News</a>
@@ -195,14 +208,14 @@ function timeAgo($dateString)
                 <?php foreach ($newsArray as $n) { ?>
                     <div class="col">
                         <div class="card" style="border: none;">
-                            <div class="image-container">
+                            <div class="image-container"  data-bs-toggle="modal" data-bs-target="#ProdevnewsModal<?php echo $n['news_id']; ?>">
                                 <div class="swiper">
                                     <div class="swiper-wrapper">
-                                        <?php foreach($n['images'] as $img){?>
-                                        <div class="swiper-slide">
-                                        <img src='<?php echo htmlspecialchars($img); ?>' class="news-image" />
-                                        </div>
-                                        <?php }?>
+                                        <?php foreach ($n['images'] as $img) { ?>
+                                            <div class="swiper-slide">
+                                                <img src='<?php echo htmlspecialchars($img); ?>' class="news-image" />
+                                            </div>
+                                        <?php } ?>
                                     </div>
                                     <div class="swiper-pagination"></div>
 
@@ -225,9 +238,9 @@ function timeAgo($dateString)
                                         <p class="card-text"><?php echo (timeAgo($n['date'])); ?> </p>
                                     </div>
                                     <?php if ($_SESSION['role'] == 1) { ?>
-                                        <div class="dropdown">
+                                        <div class="dropdown" >
 
-                                            <a class="btn" data-bs-toggle="dropdown">
+                                            <a class="btn" data-bs-toggle="dropdown" onclick="event.stopPropagation();">
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
                                                     width="24px" fill="#5f6368">
                                                     <path
@@ -261,8 +274,12 @@ function timeAgo($dateString)
                                     <?php } ?>
                                 </div>
 
-                                <h5 class="card-title"><?php echo nl2br(htmlspecialchars($n['title'])); ?></h5>
-                                <p class="card-text"><?php echo nl2br($n['content']); ?></p>
+                                <h5 class="card-title"  data-bs-toggle="modal" data-bs-target="#ProdevnewsModal<?php echo $n['news_id']; ?>"><?php echo nl2br(htmlspecialchars($n['title'])); ?></h5>
+                                <p class="card-text"  data-bs-toggle="modal" data-bs-target="#ProdevnewsModal<?php echo $n['news_id']; ?>" style="  display: -webkit-box;
+                         -webkit-box-orient: vertical;
+                         -webkit-line-clamp: 4; 
+                         overflow: hidden;
+                         text-overflow: ellipsis;"><?php echo nl2br($n['content']); ?></p>
                             </div>
                         </div>
 
@@ -335,9 +352,61 @@ function timeAgo($dateString)
                             </div>
                         </div>
                     </div>
+
+                    <div class="modal fade" id="ProdevnewsModal<?php echo $n['news_id']; ?>" tabindex="-1"
+                        aria-labelledby="ProdevnewsLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+
+                                <!-- Modal Header -->
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="ProdevnewsLabel"><?php echo htmlspecialchars($n['title']); ?></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <!-- Modal Body -->
+                                <div class="modal-body">
+                                    <div class="image-containers">
+                                        <div class="swiper">
+                                            <div class="swiper-wrapper">
+                                                <?php foreach ($n['images'] as $img) { ?>
+                                                    <div class="swiper-slide">
+                                                        <img src='<?php echo htmlspecialchars($img); ?>' class="news-imagess" />
+                                                    </div>
+                                                <?php } ?>
+                                            </div>
+                                            <div class="swiper-pagination"></div>
+
+                                        </div>
+                                        <!-- <img src='<?php echo htmlspecialchars($n['images'][0]); ?>' class="news-image" />
+                            <?php if (count($n['images']) > 1): ?>
+                            <div class="image-count">
+                                <p><b><?php echo count($n['images']) - 1; ?>+</b></p>
+                            </div>
+                            <?php endif; ?> -->
+                                    </div>
+                                    <div class="ab" style="display: flex; gap: 20px; padding-inline: 20px;">
+                                        <p class="card-text">
+                                            <?php $date = new DateTime($n['date']);
+                                            echo htmlspecialchars($date->format('d-m-Y'));
+                                            ?></p>
+                                        <p class="card-text"><?php echo (timeAgo($n['date'])); ?> </p>
+                                    </div>
+                                    
+                                    <p class="mt-3" style="padding-inline: 20px;">
+                                        <?php echo nl2br($n['content']); ?> </p>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
                 <?php } ?>
             </div>
         </div>
+
+
+
 
         <div class="modal fade" id="createProdevnewsModal" tabindex="-1" aria-labelledby="createProdevModalLabel"
             aria-hidden="true">
@@ -360,7 +429,7 @@ function timeAgo($dateString)
                                 <div class="md-6">
                                     <div class="mb-3">
                                         <label for="title" class="form-label">Title</label>
-                                        <input type="title" name="title" class="form-control"
+                                        <input type="text" name="title" class="form-control"
                                             placeholder="Enter your title" required>
                                     </div>
                                 </div>
@@ -411,12 +480,17 @@ function timeAgo($dateString)
                 el: '.swiper-pagination',
                 clickable: true,
             },
-            
+
             autoplay: {
                 delay: 2500, // Delay between transitions (in ms)
                 disableOnInteraction: false,
             },
         });
+    </script>
+    <script>
+        document.querySelector('.dropdown').addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
     </script>
 
 </body>

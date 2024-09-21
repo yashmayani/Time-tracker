@@ -8,9 +8,19 @@ if (isset($_POST['submit'])) {
     $title = $_POST['title'];
     $content = $_POST['content'];
 
-    $prodevnews = $conn->query("INSERT INTO prodev_news (title, content) VALUES ('$title', '$content')");
+// Prepare the SQL statement
+$stmt = $conn->prepare("INSERT INTO prodev_news (title, content) VALUES (?, ?)");
 
-    if ($prodevnews) {
+// Check if preparation was successful
+if ($stmt === false) {
+    die("Error preparing the statement: " . $conn->error);
+}
+
+// Bind parameters
+$stmt->bind_param('ss', $title, $content);
+
+// Execute the statement
+if ($stmt->execute()) {
         $news_id = $conn->insert_id;
         $stmt = $conn->prepare("INSERT INTO prodev_image (news_id, image) VALUES (?, ?)");
         $uploadedImages = $_FILES['image'];

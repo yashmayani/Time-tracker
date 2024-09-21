@@ -84,7 +84,7 @@ select {
        
             <a href="home.php" class="sidebar-a <?php if ($current_page == 'home.php') echo 'active'; ?>">
     <div class="sidebar-item <?php if ($current_page == 'home.php') echo 'active'; ?>">
-        <img src="./logo/master-plan 1.png" alt="Home" class="sidebar-img <?php if ($current_page == 'home.php') echo 'active'; ?>">
+        <img src="./logo/frame.png" alt="Home" class="sidebar-img <?php if ($current_page == 'home.php') echo 'active'; ?>">
         Home
     </div>
 </a>
@@ -92,14 +92,14 @@ select {
     
         <a href="dashboard.php" class="sidebar-a <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
             <div class="sidebar-item <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
-            <img src="./logo/arcticons_tv-browser-updateplugin.png" alt="Home" class="sidebar-img <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
+            <img src="./logo/frame (1).png" alt="Home" class="sidebar-img <?php if ($current_page == 'dashboard.php') echo 'active'; ?>">
        
-                Update
+            Work diary
             </div>
         </a>
         <a href="addproject.php" class="sidebar-a <?php if ($current_page == 'addproject.php' || $current_page == 'view_project.php' || $current_page == 'view_complete_project.php') echo 'active'; ?>">
     <div class="sidebar-item <?php if ($current_page == 'addproject.php' || $current_page == 'view_project.php' || $current_page == 'view_complete_project.php') echo 'active'; ?>">
-        <img src="./logo/master-plan 1.png" alt="Projects" class="sidebar-img">
+        <img src="./logo/frame (2).png" alt="Projects" class="sidebar-img">
         Projects
     </div>
 </a>
@@ -115,14 +115,14 @@ select {
         <?php }?> 
         <a href="leaves.php" class="sidebar-a <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
             <div class="sidebar-item <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
-            <img src="./logo/master-plan 1.png" alt="Home" class="sidebar-img <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
+            <img src="./logo/frame (3).png" alt="Home" class="sidebar-img <?php if ($current_page == 'leaves.php') echo 'active'; ?>">
 
                Leave
             </div>
         </a>
         <a href="policy.php" class="sidebar-a <?php if ($current_page == 'policy.php') echo 'active'; ?>">
             <div class="sidebar-item <?php if ($current_page == 'policy.php') echo 'active'; ?>">
-            <img src="./logo/master-plan 1.png" alt="Home" class="sidebar-img <?php if ($current_page == 'policy.php') echo 'active'; ?>">
+            <img src="./logo/frame (4).png" alt="Home" class="sidebar-img <?php if ($current_page == 'policy.php') echo 'active'; ?>">
 
                Company Policy
             </div>
